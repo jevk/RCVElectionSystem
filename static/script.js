@@ -37,6 +37,19 @@ function allRanksAboveZero(objects) {
     return true;
 }
 
+async function logVote(voteJSON) {
+    const response = await fetch("/vote", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(voteJSON),
+    });
+    const data = await response.json();
+    alert(data.message);
+    return await data;
+}
+
 function sendResults() {
     const candidates = [];
     const entries = document.getElementsByName("candidate-name");
@@ -59,24 +72,14 @@ function sendResults() {
         candidates.push(candidate);
     });
     const voteResult = new VoteResult(candidates, voterName);
-    fetch("https://api.earthmc.net/v1/aurora/nations/Finland", { mode: "no-cors"}).then((response) => {
-        console.log(response);
-    });
     if (allRanksAboveZero(candidates) && voterName !== "" && voterName !== " " && voterName !== null) {
-        fetch("/vote", {
-            method: "POST",
-            body: JSON.stringify(voteResult),
-            headers: {
-                "Content-Type": "application/json; charset=utf-8",
-            }
-        }).then((response) => {
-            if (response.ok) {
-                return response.json();
-            }
-            throw new Error("Request failed!");
-        });
         alert("Vote Submitted!");
+        logVote(voteResult);
     } else {
         alert("You must rank all candidates! And you must enter your name!");
     }
+}
+
+function getResults() {
+    
 }
