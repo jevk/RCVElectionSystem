@@ -3,6 +3,7 @@
     <head>
         <title>Prime Minister Elections</title>
         <link rel="stylesheet" type="text/css" href="static/style.css">
+        <script src="static/script.js"></script>
     </head>
     <body>
         <section>
@@ -26,14 +27,14 @@
                     {% for i in candidates %}
                     <tr>
                         <td>{{i}}</td>
-                        {% for e in ordinals %}
-                        <td><input type="radio" name="{{e}}" value="{{i}}"></td>
+                        {% for e in range(ordinals|length) %}
+                        <td><input type="radio" name="{{ordinals[e]}}" value="{{i}}{{e+1}}"></td>
                         {% endfor %}
                     </tr>
                     {% endfor %}
                 </table>
 
-                <input class="submit-button" type="submit" value="Submit">
+                <input onclick="sendresults" class="submit-button" type="submit" value="Submit">
             </div>
         </section>
     </body>
