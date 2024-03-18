@@ -71,12 +71,13 @@ def voting():
         return render_template("voting.html",ordinals=ordinals,candidates=candidates)
     else:
         data = request.json
+        print(data)
         if len(data) > 0:
             if check_voted_ip(request.remote_addr):
                 username = data.get("voterName")
                 if check_voted_name(username):
                     if check_finland_name(username):
-                        candidates = data.get("candidates")
+                        votingdata = data.get("candidates")
                     else:
                         return "This username is not in a Finnish town"
                 else:
