@@ -39,7 +39,12 @@ def go_to_results(e):
 
 @app.route("/vote", methods=['GET', 'POST']) #voting page
 def voting():
-    return render_template("voting.html")
+    
+    #ordinal conversion oneliner, stolen from https://codegolf.stackexchange.com/questions/4707/outputting-ordinal-numbers-1st-2nd-3rd#answer-4712
+    ordinal = lambda n: "%d%s" % (n,"tsnrhtdd"[(n//10%10!=1)*(n%10<4)*n%10::4]) 
+    ordinals = [ordinal(i+1) for i in range(len(candidates))] #generate ordinals for all table rows
+    
+    return render_template("voting.html",ordinals=ordinals,candidates=candidates)
 
 @app.route("/results") #results page
 def results():
