@@ -152,21 +152,21 @@ def voting():
         print(data)
         if len(data) == 0:
             log(request.remote_addr + " sent a post request with no data")
-            return json.dumps({'success':False}), 418, {'ContentType':'application/json'}
+            return json.dumps({"success":False}), 418, {'ContentType':'application/json'}
         
         if check_voted_ip(request.remote_addr):
             log(request.remote_addr + " tried to vote twice, raw data: " + str(data))
-            return json.dumps({'success':False,"message":"This IP has already been used to vote"}), 418, {'ContentType':'application/json'}
+            return "This IP has already been used to vote", 418, {'ContentType':'text/plain'}
 
         print(request.remote_addr)
         username = data.get("voterName").lower()
         if check_voted_name(username):
             log(username + " tried to vote twice, this time at IP " + request.remote_addr + " raw data: "+ str(data))
-            return json.dumps({'success':False,"message":"This username has already been used to vote"}), 418, {'ContentType':'application/json'}
+            return "This username has already been used to vote", 418, {'ContentType':'text/plain'}
         
         if check_finland_name(username):
             log(username + " tried to vote, but is not a part of Finland. IP: " + request.remote_addr + " raw data: "+ str(data))
-            return json.dumps({'success':False,"message":"This username is not in a Finnish town"}), 418, {'ContentType':'application/json'} 
+            return "This username is not in a Finnish town", 418, {'ContentType':'text/plain'}
         
         
         voting_data = data.get("candidates")
@@ -186,14 +186,14 @@ def voting():
 
         if invalidated:
             log("How did this happen? "+username+ " at IP" + request.remote_addr + " submitted broken data: " + str(parsed_output)) 
-            return json.dumps({'success':False}), 418, {'ContentType':'application/json'}
+            return json.dumps({"success":False}), 418, {'ContentType':'application/json'}
         
         write_results(request.remote_addr,username,parsed_output)
         voted_ips.append(request.remote_addr)
         voted_names.append(username)
         
         
-        return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
+        return json.dumps({"success":True}), 200, {'ContentType':'application/json'}
 
 
 

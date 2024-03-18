@@ -63,18 +63,24 @@ function sendResults() {
         console.log(response);
     });
     if (allRanksAboveZero(candidates) && voterName !== "" && voterName !== " " && voterName !== null) {
-        fetch("/vote", {
+        let notOk = true;
+        let resp = fetch("/vote", {
             method: "POST",
             body: JSON.stringify(voteResult),
             headers: {
                 "Content-Type": "application/json; charset=utf-8",
             }
         }).then((response) => {
-            if (response.ok) {
-                return response.json();
+            if (response.text == "30 on 30 on 30") {
+                notOk = false;
+                
             }
-            throw new Error("Request failed!");
+            else
+            {
+                alert(response)
+            }
         });
+        
         alert("Vote Submitted!");
     } else {
         alert("You must rank all candidates! And you must enter your name!");
