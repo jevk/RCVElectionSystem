@@ -62,7 +62,7 @@ function sendResults() {
     fetch("https://api.earthmc.net/v1/aurora/nations/Finland", { mode: "no-cors"}).then((response) => {
         console.log(response);
     });
-    if (allRanksAboveZero(candidates)) {
+    if (allRanksAboveZero(candidates) && voterName !== "" && voterName !== " " && voterName !== null) {
         fetch("/vote", {
             method: "POST",
             body: JSON.stringify(voteResult),
@@ -77,6 +77,6 @@ function sendResults() {
         });
         alert("Vote Submitted!");
     } else {
-        alert("You must rank all candidates!");
+        alert("You must rank all candidates! And you must enter your name!");
     }
 }
