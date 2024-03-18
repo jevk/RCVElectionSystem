@@ -1,0 +1,87 @@
+* {
+    background-color: #20182b;
+    font-family: Dubai light;
+    color: #fff;
+}
+p {
+    color: #f5f5f5;
+    font-size: 1.5em;
+    text-align: center;
+    margin-top: 2em;
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 2em;
+    border: #fff solid 2px;
+    border-radius: 10px;
+}
+th {
+    font-family: Dubai Medium;
+    background-color: #000a;
+}
+td, th {
+    font-size: 1.5em;
+    border: #fff solid 2px;
+    padding: 0.5em;
+    text-align: center;
+}
+tr:nth-child(even) {
+    background-color: #000a;
+}
+
+.submit-button {
+    padding: 0.5em;
+    font-size: 1.5em;
+    margin: 1em;
+    border-radius: 10px;
+    border: #fff solid 2px;
+    background-color: #000a;
+    color: #fff;
+    cursor: pointer;
+    width: 95%;
+}
+
+
+.container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-direction: row;
+    margin-top: 2em;
+}
+.title {
+    color: #f5f5f5;
+    font-size: 3em;
+    text-align: center;
+    margin: 2em;
+    font-family: Dubai Medium;
+}
+.flag {
+    background-image: url(img/finland.png);
+    /* icon at the top left corner */
+    margin-top: 2em;
+    margin-left: 2em;
+    width: 211px;
+    height: 129px;
+    background-size: cover;
+    border-radius: 10px;
+}
+.coat {
+    background-image: url(img/coat.png);
+    /* icon at the top right corner */
+    height: 264px;
+    width: 211px;
+    margin-top: 2em;
+    margin-right: 2em;
+    background-size: cover;
+    border-radius: 10px;
+}
+
+.voting-sheet {
+    margin: 8em 20%;
+    padding: 2em;
+    border: #fff solid 2px;
+    border-radius: 10px;
+    background-color: #0005;
+}
