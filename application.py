@@ -11,9 +11,12 @@ logfile = ""
 
 def start_logger():
     global logfile
-
+    
     print("Initiating logger...")
-    logfile = "log/"+datetime.utcnow().strftime("%Y-%m-%d-%H-%M-%S-%f")[:-3]+".txt"
+    if not os.path.exists("log"):
+        print("Log directory not found, creating...")
+        os.makedirs("log")
+    logfile = "log/"+datetime.utcnow().strftime("%Y-%m-%d-%H-%M-%S-%f")[:-3]+".txt" #log file name is timestamped
     with open(logfile, "x") as file:
         file.write("-----------------------Log start-------------------------------\n")
     print("Logger initialized successfully");
