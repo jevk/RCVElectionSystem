@@ -26,15 +26,14 @@
                     </tr>
                     {% for i in candidates %}
                     <tr>
-                        <td>{{i}}</td>
+                        <td name="candidate-name">{{i}}</td>
                         {% for e in range(ordinals|length) %}
-                        <td><input type="radio" name="{{ordinals[e]}}" value="{{i}}{{e+1}}"></td>
+                        <td><input class="radio-btn" type="radio" name="{{ordinals[e]}}" value="{{i}}{{e+1}}" id="{{i}}{{e+1}}"></td>
                         {% endfor %}
                     </tr>
                     {% endfor %}
                 </table>
-
-                <input onclick="sendresults" class="submit-button" type="submit" value="Submit">
+                <input onclick="sendResults()" class="submit-button" type="submit" value="Submit">
             </div>
         </section>
     </body>

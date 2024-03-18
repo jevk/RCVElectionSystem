@@ -85,3 +85,12 @@ tr:nth-child(even) {
     border-radius: 10px;
     background-color: #0005;
 }
+
+.radio-btn {
+    /* make the radio button circle big */
+    width: 2em;
+    height: 2em;
+    border-radius: 50%;
+    margin: 0.5em;
+    cursor: pointer;
+}
