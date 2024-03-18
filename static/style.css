@@ -41,6 +41,16 @@ tr:nth-child(even) {
     cursor: pointer;
     width: 95%;
 }
+.voter-name {
+    padding: 0.5em;
+    font-size: 1.5em;
+    margin: 1em;
+    border-radius: 10px;
+    border: #fff solid 2px;
+    background-color: #000a;
+    color: #fff;
+    width: 95%;
+}
 
 
 .container {
@@ -84,4 +94,13 @@ tr:nth-child(even) {
     border: #fff solid 2px;
     border-radius: 10px;
     background-color: #0005;
+}
+
+.radio-btn {
+    /* make the radio button circle big */
+    width: 2em;
+    height: 2em;
+    border-radius: 50%;
+    margin: 0.5em;
+    cursor: pointer;
 }
