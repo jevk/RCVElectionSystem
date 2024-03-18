@@ -21,6 +21,13 @@ class Candidate {
     }
 }
 
+class VoteResult {
+    constructor(candidates, voterName) {
+        this.candidates = candidates;
+        this.voterName = voterName;
+    }
+}
+
 function allRanksAboveZero(objects) {
     for (let i = 0; i < objects.length; i++) {
         if (objects[i].getRank() === 0) {
@@ -33,6 +40,7 @@ function allRanksAboveZero(objects) {
 function sendResults() {
     const candidates = [];
     const entries = document.getElementsByName("candidate-name");
+    const voterName = document.getElementById("voter-name").value;
     entries.forEach((c) => {
         const name = c.textContent;
         const candidate = new Candidate(name);
@@ -50,10 +58,25 @@ function sendResults() {
         }
         candidates.push(candidate);
     });
+    const voteResult = new VoteResult(candidates, voterName);
+    fetch("https://api.earthmc.net/v1/aurora/nations/Finland", { mode: "no-cors"}).then((response) => {
+        console.log(response);
+    });
     if (allRanksAboveZero(candidates)) {
-        console.log(candidates);
-        return candidates;
+        fetch("/vote", {
+            method: "POST",
+            body: JSON.stringify(voteResult),
+            headers: {
+                "Content-Type": "application/json; charset=utf-8",
+            }
+        }).then((response) => {
+            if (response.ok) {
+                return response.json();
+            }
+            throw new Error("Request failed!");
+        });
+        alert("Vote Submitted!");
     } else {
-        alert("Invalid Vote!\n \nPlease rank all candidates, and make sure no two candidates have the same rank.");
+        alert("You must rank all candidates!");
     }
 }
