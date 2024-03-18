@@ -193,7 +193,7 @@ def voting():
         voted_names.append(username)
         
         
-        return json.dumps({"success":True,"Your vote has been counted!"}), 200, {'ContentType':'application/json'}
+        return json.dumps({"success":True,"message":"Your vote has been counted!"}), 200, {'ContentType':'application/json'}
 
 
 
