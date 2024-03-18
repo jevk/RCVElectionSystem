@@ -156,17 +156,17 @@ def voting():
         
         if check_voted_ip(request.remote_addr):
             log(request.remote_addr + " tried to vote twice, raw data: " + str(data))
-            return "This IP has already been used to vote", 418, {'ContentType':'text/plain'}
+            return json.dumps({"success":True,"message":"This IP has already been used to vote"}), 418, {'ContentType':'application/json'}
 
         print(request.remote_addr)
         username = data.get("voterName").lower()
         if check_voted_name(username):
             log(username + " tried to vote twice, this time at IP " + request.remote_addr + " raw data: "+ str(data))
-            return "This username has already been used to vote", 418, {'ContentType':'text/plain'}
+            return json.dumps({"success":True,"message":"This username has already been used to vote"}), 418, {'ContentType':'application/json'}
         
         if check_finland_name(username):
             log(username + " tried to vote, but is not a part of Finland. IP: " + request.remote_addr + " raw data: "+ str(data))
-            return "This username is not in a Finnish town", 418, {'ContentType':'text/plain'}
+            return json.dumps({"success":True,"message":"This username is not in a Finnish town"}), 418, {'ContentType':'application/json'}
         
         
         voting_data = data.get("candidates")
