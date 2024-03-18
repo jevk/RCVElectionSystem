@@ -10,33 +10,19 @@
             <!-- Finnish flag and coat of arms decoration -->
             <div class="container">
                 <div class="flag"></div>
-                <h1 class="title">Prime Minister Voting Sheet</h1>
+                <h1 class="title">Prime Minister Election Results</h1>
                 <div class="coat"></div>
             </div>
         </section>
         
         <section>
             <div class="voting-sheet" style="font-size: 2em;">
-                Azalea
-                <div class="score-container">
-                    <div class="score-bar" style="width: 20%">20%</div>
-                </div>
-                <br>
-                CJ
-                <div class="score-container">
-                    <div class="score-bar" style="width: 20%">20%</div>
-                </div>
-                <br>
-                Emerald
-                <div class="score-container">
-                    <div class="score-bar" style="width: 20%">20%</div>
-                </div>
-                <br>
-                slash_six
-                <div class="score-container">
-                    <div class="score-bar" style="width: 20%">20%</div>
-                </div>
-                <br>
+                {% for e in range(candidates|length) %}
+                    {{candidates[e]}}
+                    <div class="score-container">
+                        <div class="score-bar" style="width: {{percentages[e]}}">{{results[e]}}</div>
+                    </div>
+                {% endfor %}
             </div>
         </section>
     </body>

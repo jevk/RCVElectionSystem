@@ -14,13 +14,9 @@ finns = [] #members in the nation of Finland, when the application is started
 candidates = [] #candidates in the election
 voted_ips = [] #IPs of people who already voted
 voted_names = [] #usernames of people who already voted
+raw_results = {} #current raw voting data
+results = [] #currently calculated results
 logfile = "" #logfile location
-
-
-#utility thingies
-
-#ordinal conversion oneliner, stolen from https://codegolf.stackexchange.com/questions/4707/outputting-ordinal-numbers-1st-2nd-3rd#answer-4712
-ordinal = lambda n: "%d%s" % (n,"tsnrhtdd"[(n//10%10!=1)*(n%10<4)*n%10::4]) 
 
 
 
@@ -108,8 +104,13 @@ def get_results():
     if os.path.exists("results.csv"):
         log("Getting results from file...")
         with open("results.csv","r") as file:
-            pass
-    return ""
+            lines = file.readlines()
+            for line in lines[1:]:
+                splitLine = line.split(",")
+                for i in range(len(candidates)):
+                    raw_results[i].append(splitLine[i+3].strip("\n"))
+            log("Current raw results: "+str(raw_results))
+    return 
 
 
 
@@ -131,6 +132,30 @@ def check_voted_ip(ip): #Returns false if an ip hasn't already voted
     if ip not in voted_ips:
         return False
     return True
+
+
+
+
+#utility thingies
+
+#ordinal conversion oneliner, stolen from https://codegolf.stackexchange.com/questions/4707/outputting-ordinal-numbers-1st-2nd-3rd#answer-4712
+ordinal = lambda n: "%d%s" % (n,"tsnrhtdd"[(n//10%10!=1)*(n%10<4)*n%10::4]) 
+
+def calculate_results():
+    votes = {}
+    for i in candidates:
+        votes[i] = 0
+        
+    for i in range(len(candidates)):
+        for cand in raw_results[i]:
+            if cand in votes:
+                votes[cand] = votes[cand] + 1
+
+        sortedCandidates = sorted(votes.keys(), key=lambda item: item[1])
+        print(votes)
+        print(sortedCandidates)
+        del votes[sortedCandidates[-1]]
+    pass
 
 
 
@@ -184,7 +209,7 @@ def voting():
             if i not in candidates:
                 invalidated = True
 
-        if invalidated:
+        if invalidated: #vote data is somehow broken
             log("How did this happen? "+username+ " at IP" + request.remote_addr + " submitted broken data: " + str(parsed_output)) 
             return json.dumps({"success":False}), 418, {'ContentType':'application/json'}
         
@@ -199,7 +224,7 @@ def voting():
 
 @app.route("/results") #results page
 def results():
-    return render_template("results.html")
+    return render_template("results.html",candidates=candidates,results=results, percentages=percentages)
 
 
 
@@ -208,6 +233,8 @@ def results():
 
 if __name__ == "__main__":
     start_logger()
+    
+    
     log("Reading listed candidates from candidates.txt")
     if not os.path.exists("candidates.txt"):
         log("candidates.txt file doesn't exist, exiting...");
@@ -218,6 +245,8 @@ if __name__ == "__main__":
             log("no candidates listed, exiting...")
             exit()
         log("Listed candidates are: "+", ".join(candidates))
+    
+    
     log("Getting members in Finland")
     try:
         finns = [i.lower() for i in requests.get("https://api.earthmc.net/v2/aurora/nations/Finland").json()["residents"]]
@@ -225,7 +254,16 @@ if __name__ == "__main__":
     except:
         log("Something went wrong with getting nation members, exiting: "+traceback.format_exc())
         exit()
-    get_previous_voters()
+    
+        
+    get_previous_voters(
+    )
+    for i in range(len(candidates)):
+        raw_results[i] = []
+    get_results();
+    calculate_results();
+    
+    
     log("Starting web application...")
     app.run()
     log("Application closed")
