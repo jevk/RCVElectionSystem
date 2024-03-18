@@ -36,7 +36,7 @@ def start_logger():
         os.makedirs("log")
     logfile = "log/"+datetime.utcnow().strftime("%Y-%m-%d-%H-%M-%S-%f")[:-3]+".txt" #log file name is timestamped
     with open(logfile, "x") as file:
-        file.write("-----------------------Log start-------------------------------\n")
+        file.write("-------------------------------Log start-------------------------------\n")
     print("Logger initialized successfully");
 
 
@@ -93,9 +93,22 @@ def write_results(ip,username,results):
     removequeue.clear()
     return
 
+def get_previous_voters():
+    if os.path.exists("results.csv"):
+        log("Getting previous voters from results file...")
+        with open("results.csv","r") as file:
+            lines = file.readlines()
+            for line in lines[1:]:
+                splitLine = line.split(",")
+                voted_ips.append(splitLine[1])
+                voted_names.append(splitLine[2])
+                log(splitLine[2]+" has already voted at IP "+splitLine[1])
+
 def get_results():
     if os.path.exists("results.csv"):
-        log("Getting previous results from results file")
+        log("Getting results from file...")
+        with open("results.csv","r") as file:
+            pass
     return ""
 
 
@@ -148,7 +161,7 @@ def voting():
         print(request.remote_addr)
         username = data.get("voterName").lower()
         if check_voted_name(username):
-            log(username + " tried to vote twice, this time with IP " + request.remote_addr + " raw data: "+ str(data))
+            log(username + " tried to vote twice, this time at IP " + request.remote_addr + " raw data: "+ str(data))
             return json.dumps({'success':False,"message":"This username has already been used to vote"}), 418, {'ContentType':'application/json'}
         
         if check_finland_name(username):
@@ -176,6 +189,8 @@ def voting():
             return json.dumps({'success':False}), 418, {'ContentType':'application/json'}
         
         write_results(request.remote_addr,username,parsed_output)
+        voted_ips.append(request.remote_addr)
+        voted_names.append(username)
         
         
         return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
@@ -203,13 +218,14 @@ if __name__ == "__main__":
             log("no candidates listed, exiting...")
             exit()
         log("Listed candidates are: "+", ".join(candidates))
-    log("Getting members in finland")
+    log("Getting members in Finland")
     try:
         finns = [i.lower() for i in requests.get("https://api.earthmc.net/v2/aurora/nations/Finland").json()["residents"]]
         log("Current members of the nation are: "+", ".join(finns))
     except:
         log("Something went wrong with getting nation members, exiting: "+traceback.format_exc())
         exit()
+    get_previous_voters()
     log("Starting web application...")
     app.run()
     log("Application closed")
