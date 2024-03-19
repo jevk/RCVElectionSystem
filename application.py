@@ -16,7 +16,7 @@ candidates = [] #candidates in the election
 voted_ips = [] #IPs of people who already voted
 voted_names = [] #usernames of people who already voted
 ballots = {} #current ballot data
-results = [] #currently calculated results
+voting_results = {} #currently calculated results
 logfile = "" #logfile location
 
 
@@ -150,16 +150,73 @@ def list_to_percentages(list):
         total+=int(i)
     
     return [str(int(int(i)/total*100))+"%" for i in list]
-    
-def calculate_results():
+
+
+def calculate_results(): #returns whether winner is determined
+#TODO fix the bit spaghet code
+    log("Calculating current voting results...")
+    losers = []
     votes = {}
     for i in candidates:
-        votes[i] = 0
+        votes[i] = [] #will contain players who voted as first choice (and then second chocie and etc)
     
     #round1
+    for i in ballots:
+        votes[ballots[i][0]].append(i)
     
+    sorted_votes = dict(sorted(votes.items(), key=lambda item: len(item[1]))) #sorted candidates by votes
+    min_votes = len(list(sorted_votes.values())[0])
+    max_votes = len(list(sorted_votes.values())[1])
     
-    pass
+    if min_votes == max_votes: #complete tie
+        for i in candidates:
+            voting_results[i] = min_votes
+        log("Round 1 ends with a tie: "+str({i:len(votes[i]) for i in votes}))
+        return False;
+    else:
+        for i in votes:
+            if len(votes[i]) == min_votes:
+                voting_results[i] = min_votes
+                losers.append(i)
+        log("Round 1 voting results are: "+str({i:len(votes[i]) for i in votes})+" with the loser(s) being: "+", ".join(losers))
+        for i in losers: #remove losers from counted votes, cause their final results already written
+            del votes[i]
+    
+    #subsequent rounds
+    round = 1
+    running = True
+    while running:
+        for i in ballots:
+            if ballots[i][round-1] in losers: #check if the previous, more preferrable choice has lost already
+                if ballots[i][round] not in losers:
+                    votes[ballots[i][round]].append(i)
+        
+        sorted_votes = dict(sorted(votes.items(), key=lambda item: len(item[1]))) #sorted candidates by votes
+        min_votes = len(list(sorted_votes.values())[0])
+        max_votes = len(list(sorted_votes.values())[1])
+
+        if min_votes == max_votes: #complete tie
+            for i in candidates:
+                voting_results[i] = min_votes
+            log("Round "+str(round+1)+" ends with a tie: "+str({i:len(votes[i]) for i in votes}))
+            return False;
+        else:
+            for i in votes:
+                if len(votes[i]) == min_votes:
+                    voting_results[i] = min_votes
+                    losers.append(i)
+            log("Round "+str(round+1)+" voting results are: "+str({i:len(votes[i]) for i in votes})+" with the loser(s) being: "+", ".join(losers))
+            for i in losers: #remove losers from counted votes, cause their final results already written
+                del votes[i]
+        
+        if len(votes)==1:
+            running = False
+            voting_results[list(votes)[0]] = max_votes
+        
+        round+=1
+    print(votes)
+    
+
 
 
 
@@ -268,7 +325,7 @@ if __name__ == "__main__":
     #for i in range(len(candidates)):
     #   raw_results[i] = []
     get_results()
-    #calculate_results()
+    calculate_results()
     app.run()
      #vote count of each candidate in every roun
     log("Application closed...")
