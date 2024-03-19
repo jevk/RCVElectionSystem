@@ -103,7 +103,7 @@ def get_previous_voters():
                 log(splitLine[2]+" has already voted at IP "+splitLine[1])
 
 
-def get_results():
+def get_ballots():
     if os.path.exists("results.csv"):
         log("Getting results from file...")
         with open("results.csv","r") as file:
@@ -143,6 +143,7 @@ def check_voted_ip(ip): #Returns false if an ip hasn't already voted
 #ordinal conversion oneliner, stolen from https://codegolf.stackexchange.com/questions/4707/outputting-ordinal-numbers-1st-2nd-3rd#answer-4712
 ordinal = lambda n: "%d%s" % (n,"tsnrhtdd"[(n//10%10!=1)*(n%10<4)*n%10::4])
 
+
 def list_to_percentages(list):
     total = 0
     
@@ -166,13 +167,13 @@ def calculate_results(): #returns whether winner is determined
     
     sorted_votes = dict(sorted(votes.items(), key=lambda item: len(item[1]))) #sorted candidates by votes
     min_votes = len(list(sorted_votes.values())[0])
-    max_votes = len(list(sorted_votes.values())[1])
+    max_votes = len(list(sorted_votes.values())[-1])
     
     if min_votes == max_votes: #complete tie
         for i in candidates:
             voting_results[i] = min_votes
         log("Round 1 ends with a tie: "+str({i:len(votes[i]) for i in votes}))
-        return False;
+        return False
     else:
         for i in votes:
             if len(votes[i]) == min_votes:
@@ -181,6 +182,10 @@ def calculate_results(): #returns whether winner is determined
         log("Round 1 voting results are: "+str({i:len(votes[i]) for i in votes})+" with the loser(s) being: "+", ".join(losers))
         for i in losers: #remove losers from counted votes, cause their final results already written
             del votes[i]
+    
+    if len(votes)==1:
+        voting_results[list(votes)[0]] = max_votes
+        return True
     
     #subsequent rounds
     round = 1
@@ -193,13 +198,13 @@ def calculate_results(): #returns whether winner is determined
         
         sorted_votes = dict(sorted(votes.items(), key=lambda item: len(item[1]))) #sorted candidates by votes
         min_votes = len(list(sorted_votes.values())[0])
-        max_votes = len(list(sorted_votes.values())[1])
+        max_votes = len(list(sorted_votes.values())[-1])
 
         if min_votes == max_votes: #complete tie
             for i in candidates:
                 voting_results[i] = min_votes
             log("Round "+str(round+1)+" ends with a tie: "+str({i:len(votes[i]) for i in votes}))
-            return False;
+            return False
         else:
             for i in votes:
                 if len(votes[i]) == min_votes:
@@ -210,14 +215,23 @@ def calculate_results(): #returns whether winner is determined
                 del votes[i]
         
         if len(votes)==1:
-            running = False
             voting_results[list(votes)[0]] = max_votes
+            return True
         
         round+=1
     print(votes)
-    
 
 
+def check_tie():
+    sorted_results = dict(sorted(voting_results.items(), key=lambda item: item[1]))
+    maxVotes = list(sorted_results.values())[-1]
+    if list(sorted_results.values())[-2] == maxVotes:
+        return True
+    return False
+
+
+def get_winner():
+    return (sorted(voting_results.items(), key=lambda item: item[1]))[-1][0]
 
 
 
@@ -227,6 +241,7 @@ def calculate_results(): #returns whether winner is determined
 @app.errorhandler(404) #redirect all other pages to results
 def go_to_results(e):
     return redirect("/results")
+
 
 @app.route("/vote", methods=['GET', 'POST']) #voting page
 def voting():
@@ -284,12 +299,12 @@ def voting():
         return json.dumps({"success":True,"message":"Your vote has been counted!"}), 200, {'ContentType':'application/json'}
 
 
-
 @app.route("/results") #results page
 def results():
-    results = [1,2,3,4]
-    percentages = list_to_percentages(results)
-    return render_template("results.html",candidates=candidates,results=results, percentages=percentages)
+
+    vote_values = [1,2,3,4]
+    percentages = list_to_percentages(vote_values)
+    return render_template("results.html",candidates=candidates,results=vote_values, percentages=percentages)
 
 
 
@@ -298,7 +313,6 @@ def results():
 
 if __name__ == "__main__":
     start_logger()
-    
     
     log("Reading listed candidates from candidates.txt...")
     if not os.path.exists("candidates.txt"):
@@ -324,8 +338,13 @@ if __name__ == "__main__":
     get_previous_voters()
     #for i in range(len(candidates)):
     #   raw_results[i] = []
-    get_results()
+    get_ballots()
     calculate_results()
+    log("Current results are: "+str(voting_results))
+    if check_tie():
+        log("It's currently a tie!")
+    else:
+        log("The current winner is "+get_winner()+"!")
     app.run()
      #vote count of each candidate in every roun
     log("Application closed...")
