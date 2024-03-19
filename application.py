@@ -25,14 +25,14 @@ logfile = "" #logfile location
 def start_logger():
     global logfile
     
-    print("Initiating logger...")
+    print("Initializing logger...")
     if not os.path.exists("log"):
         print("Log directory not found, creating...")
         os.makedirs("log")
     logfile = "log/"+datetime.utcnow().strftime("%Y-%m-%d-%H-%M-%S-%f")[:-3]+".txt" #log file name is timestamped
     with open(logfile, "x") as file:
         file.write("-------------------------------Log start-------------------------------\n")
-    print("Logger initialized successfully")
+    print("Logger initialized successfully!")
 
 
 def log(input): #we want to only log outputs from the actual voting site flask output, so I'm doing this'
@@ -55,7 +55,7 @@ def file_setup():
            for i in range(len(candidates)):
                f_line+=ordinal(i+1)+" choice,"
            file.write(f_line+"\n")
-       log("Results file creation successful")
+       log("Results file creation successful!")
 
 unwritten = [] #cannot write into csv file if it is open in excel, postpone for writing later
 def write_results(ip,username,ballot):
@@ -71,11 +71,11 @@ def write_results(ip,username,ballot):
             for i in unwritten: #postponed data
                 log("Writing postponed vote: "+str(i)+" into file...")
                 file.write(",".join(i)+"\n")    
-                log("Success")
+                log("Success!")
                 removequeue.append(i)    
             log("Writing current vote into file...")
             file.write(",".join(data_to_write)+"\n")
-        log("All votes written into file succesfully")
+        log("All votes written into file succesfully!")
         
     except:
         unwritten.append(data_to_write)
@@ -142,6 +142,7 @@ def check_voted_ip(ip): #Returns false if an ip hasn't already voted
 ordinal = lambda n: "%d%s" % (n,"tsnrhtdd"[(n//10%10!=1)*(n%10<4)*n%10::4])
 
 def calculate_results():
+    
     pass
 
 
@@ -191,7 +192,6 @@ def voting():
             if i["name"] not in candidates: #if incorrect candidate
                 invalidated = True
             parsed_output[i["rank"]]=i["name"]
-        print(parsed_output)
         ballot = dict(sorted(parsed_output.items())).values() #generate ballot from data
         
         if len(parsed_output) != len(candidates): 
@@ -207,7 +207,6 @@ def voting():
         voted_names.append(username)
         ballots[username] = ballot
         log(username+" has submitted their ballot: "+str(ballot))
-        
         
         return json.dumps({"success":True,"message":"Your vote has been counted!"}), 200, {'ContentType':'application/json'}
 
@@ -228,7 +227,7 @@ if __name__ == "__main__":
     start_logger()
     
     
-    log("Reading listed candidates from candidates.txt")
+    log("Reading listed candidates from candidates.txt...")
     if not os.path.exists("candidates.txt"):
         log("candidates.txt file doesn't exist, exiting...")
         exit()
@@ -240,12 +239,12 @@ if __name__ == "__main__":
         log("Listed candidates are: "+", ".join(candidates))
     
     
-    log("Getting members in Finland")
+    log("Getting members in Finland...")
     try:
         finns = [i.lower() for i in requests.get("https://api.earthmc.net/v2/aurora/nations/Finland").json()["residents"]]
         log("Current members of the nation are: "+", ".join(finns))
     except:
-        log("Something went wrong with getting nation members, exiting: "+traceback.format_exc())
+        log("Something went wrong with getting nation members: "+traceback.format_exc()+" exiting...")
         exit()
     
         
@@ -256,4 +255,4 @@ if __name__ == "__main__":
     #calculate_results()
     app.run()
      #vote count of each candidate in every roun
-    log("Application closed")
+    log("Application closed...")
