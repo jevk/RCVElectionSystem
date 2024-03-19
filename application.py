@@ -1,7 +1,6 @@
 from flask import *
-from datetime import datetime, timedelta
+from datetime import datetime
 import os
-import csv
 import json
 import requests
 
@@ -14,7 +13,7 @@ finns = [] #members in the nation of Finland, when the application is started
 candidates = [] #candidates in the election
 voted_ips = [] #IPs of people who already voted
 voted_names = [] #usernames of people who already voted
-raw_results = {} #current raw voting data
+ballots = {} #current ballot data
 results = [] #currently calculated results
 logfile = "" #logfile location
 
@@ -33,7 +32,7 @@ def start_logger():
     logfile = "log/"+datetime.utcnow().strftime("%Y-%m-%d-%H-%M-%S-%f")[:-3]+".txt" #log file name is timestamped
     with open(logfile, "x") as file:
         file.write("-------------------------------Log start-------------------------------\n")
-    print("Logger initialized successfully");
+    print("Logger initialized successfully")
 
 
 def log(input): #we want to only log outputs from the actual voting site flask output, so I'm doing this'
@@ -59,10 +58,10 @@ def file_setup():
        log("Results file creation successful")
 
 unwritten = [] #cannot write into csv file if it is open in excel, postpone for writing later
-def write_results(ip,username,results):
+def write_results(ip,username,ballot):
     file_setup()
     data_to_write = [datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"),ip,username]
-    for i in results.values():
+    for i in ballot:
         data_to_write.append(i)
         
     removequeue = []
@@ -89,6 +88,7 @@ def write_results(ip,username,results):
     removequeue.clear()
     return
 
+
 def get_previous_voters():
     if os.path.exists("results.csv"):
         log("Getting previous voters from results file...")
@@ -100,16 +100,16 @@ def get_previous_voters():
                 voted_names.append(splitLine[2])
                 log(splitLine[2]+" has already voted at IP "+splitLine[1])
 
+
 def get_results():
     if os.path.exists("results.csv"):
         log("Getting results from file...")
         with open("results.csv","r") as file:
             lines = file.readlines()
             for line in lines[1:]:
-                splitLine = line.split(",")
-                for i in range(len(candidates)):
-                    raw_results[i].append(splitLine[i+3].strip("\n"))
-            log("Current raw results: "+str(raw_results))
+                split_line = line.strip("\n").split(",")
+                ballots[split_line[2]] = [split_line[i] for i in range(3,3+len(candidates))]
+            log("Current ballots: "+str(ballots))
     return 
 
 
@@ -139,23 +139,11 @@ def check_voted_ip(ip): #Returns false if an ip hasn't already voted
 #utility thingies
 
 #ordinal conversion oneliner, stolen from https://codegolf.stackexchange.com/questions/4707/outputting-ordinal-numbers-1st-2nd-3rd#answer-4712
-ordinal = lambda n: "%d%s" % (n,"tsnrhtdd"[(n//10%10!=1)*(n%10<4)*n%10::4]) 
+ordinal = lambda n: "%d%s" % (n,"tsnrhtdd"[(n//10%10!=1)*(n%10<4)*n%10::4])
 
 def calculate_results():
-    votes = {}
-    for i in candidates:
-        votes[i] = 0
-        
-    for i in range(len(candidates)):
-        for cand in raw_results[i]:
-            if cand in votes:
-                votes[cand] = votes[cand] + 1
-
-        sortedCandidates = sorted(votes.keys(), key=lambda item: item[1])
-        print(votes)
-        print(sortedCandidates)
-        del votes[sortedCandidates[-1]]
     pass
+
 
 
 
@@ -174,7 +162,7 @@ def voting():
         return render_template("voting.html",ordinals=ordinals,candidates=candidates)
     else:
         data = request.json
-        print(data)
+        #print(data)
         if len(data) == 0:
             log(request.remote_addr + " sent a post request with no data")
             return json.dumps({"success":False}), 418, {'ContentType':'application/json'}
@@ -183,7 +171,6 @@ def voting():
             log(request.remote_addr + " tried to vote twice, raw data: " + str(data))
             return json.dumps({"success":True,"message":"This IP has already been used to vote"}), 418, {'ContentType':'application/json'}
 
-        print(request.remote_addr)
         username = data.get("voterName").lower()
         if check_voted_name(username):
             log(username + " tried to vote twice, this time at IP " + request.remote_addr + " raw data: "+ str(data))
@@ -194,28 +181,32 @@ def voting():
             return json.dumps({"success":True,"message":"This username is not in a Finnish town"}), 418, {'ContentType':'application/json'}
         
         
-        voting_data = data.get("candidates")
+        voting_data = data.get("candidates") #get ballot data from incoming json
         parsed_output = {}
+        ballot = []
 
         invalidated = False
 
-        for i in voting_data:
-            parsed_output[i["rank"]]=i["name"]
-        
-        if len(parsed_output) != len(candidates):
-            invalidated = True
-            
-        for i in parsed_output.values():
-            if i not in candidates:
+        for i in voting_data: #parse incoming data
+            if i["name"] not in candidates: #if incorrect candidate
                 invalidated = True
+            parsed_output[i["rank"]]=i["name"]
+        print(parsed_output)
+        ballot = dict(sorted(parsed_output.items())).values() #generate ballot from data
+        
+        if len(parsed_output) != len(candidates): 
+            invalidated = True
 
         if invalidated: #vote data is somehow broken
             log("How did this happen? "+username+ " at IP" + request.remote_addr + " submitted broken data: " + str(parsed_output)) 
             return json.dumps({"success":False}), 418, {'ContentType':'application/json'}
         
-        write_results(request.remote_addr,username,parsed_output)
+        write_results(request.remote_addr,username,ballot)
+        
         voted_ips.append(request.remote_addr)
         voted_names.append(username)
+        ballots[username] = ballot
+        log(username+" has submitted their ballot: "+str(ballot))
         
         
         return json.dumps({"success":True,"message":"Your vote has been counted!"}), 200, {'ContentType':'application/json'}
@@ -224,6 +215,8 @@ def voting():
 
 @app.route("/results") #results page
 def results():
+    results = [1,2,3,4]
+    percentages = ["20%","20%","20%","20%"]
     return render_template("results.html",candidates=candidates,results=results, percentages=percentages)
 
 
@@ -237,7 +230,7 @@ if __name__ == "__main__":
     
     log("Reading listed candidates from candidates.txt")
     if not os.path.exists("candidates.txt"):
-        log("candidates.txt file doesn't exist, exiting...");
+        log("candidates.txt file doesn't exist, exiting...")
         exit()
     with open("candidates.txt","r",encoding="UTF8") as file: #read participating candidates from candidates.txt and parse
         candidates = [i.replace("\n","") for i in file.readlines()] #remove line endings
@@ -256,14 +249,11 @@ if __name__ == "__main__":
         exit()
     
         
-    get_previous_voters(
-    )
-    for i in range(len(candidates)):
-        raw_results[i] = []
-    get_results();
-    calculate_results();
-    
-    
-    log("Starting web application...")
+    get_previous_voters()
+    #for i in range(len(candidates)):
+    #   raw_results[i] = []
+    get_results()
+    #calculate_results()
     app.run()
+     #vote count of each candidate in every roun
     log("Application closed")
