@@ -1,5 +1,7 @@
 from flask import *
 from datetime import datetime
+from random import shuffle
+from copy import deepcopy
 import os
 import json
 import requests
@@ -141,7 +143,21 @@ def check_voted_ip(ip): #Returns false if an ip hasn't already voted
 #ordinal conversion oneliner, stolen from https://codegolf.stackexchange.com/questions/4707/outputting-ordinal-numbers-1st-2nd-3rd#answer-4712
 ordinal = lambda n: "%d%s" % (n,"tsnrhtdd"[(n//10%10!=1)*(n%10<4)*n%10::4])
 
+def list_to_percentages(list):
+    total = 0
+    
+    for i in list:
+        total+=int(i)
+    
+    return [str(int(int(i)/total*100))+"%" for i in list]
+    
 def calculate_results():
+    votes = {}
+    for i in candidates:
+        votes[i] = 0
+    
+    #round1
+    
     
     pass
 
@@ -157,10 +173,10 @@ def go_to_results(e):
 
 @app.route("/vote", methods=['GET', 'POST']) #voting page
 def voting():
-
     if request.method == "GET":
         ordinals = [ordinal(i+1) for i in range(len(candidates))] #generate ordinals for all table rows
-        return render_template("voting.html",ordinals=ordinals,candidates=candidates)
+        user_candidates = deepcopy(candidates) #so python won't create a pointer, but creates an actual separate list
+        return render_template("voting.html",ordinals=ordinals,candidates=user_candidates)
     else:
         data = request.json
         #print(data)
@@ -215,7 +231,7 @@ def voting():
 @app.route("/results") #results page
 def results():
     results = [1,2,3,4]
-    percentages = ["20%","20%","20%","20%"]
+    percentages = list_to_percentages(results)
     return render_template("results.html",candidates=candidates,results=results, percentages=percentages)
 
 
