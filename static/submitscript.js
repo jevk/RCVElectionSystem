@@ -47,6 +47,7 @@ async function logVote(voteJSON) {
     });
     const data = await response.json();
     alert(data.message);
+    if (data.success) window.location.href = "/results";
     return await data;
 }
 
