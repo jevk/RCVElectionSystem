@@ -9,8 +9,8 @@ import requests
 
 app = Flask(__name__)
 
-open_time = 1710885600 #voting open time (seconds since epoch)
-close_time = 1710972000 #voting close time (seconds since epoch)
+open_time = 1710972000 #1710885600 #voting open time (seconds since epoch)
+close_time = 1710885600 #1710972000 #voting close time (seconds since epoch)
 
 finns = [] #members in the nation of Finland, when the application is started
 candidates = [] #candidates in the election
@@ -250,6 +250,16 @@ def open_delta(): #get time delta to opening time or from opening time in second
         return open_time-curr_time
     if curr_time > close_time: #will be negative to indicate that voting is closed
         return close_time-curr_time
+
+def open_timestamp(): #returns either the timestamp when the voting opens or when it closes
+    curr_time = int(datetime.now().timestamp())
+    if curr_time < open_time:
+        return open_time
+    if curr_time > close_time:
+        return close_time
+
+
+
 #flask logic    
 
 @app.errorhandler(404) #redirect all other pages to results
@@ -265,16 +275,19 @@ def voting():
             user_candidates = deepcopy(candidates) #so python won't create a pointer, but creates an actual separate list
             shuffle(user_candidates)
             running = True
-            delta = 0
+            timestamp = 0
         else:
             ordinals = []
             user_candidates = []
             running = False
-            delta = open_delta() #TODO - pass timestamp instead and have a javascript script do the counting
-        return render_template("voting.html",ordinals = ordinals,candidates = user_candidates, running = running, delta = delta)
+            timestamp = open_timestamp()*1000 #cause JS works with milliseconds
+        return render_template("voting.html",ordinals = ordinals,candidates = user_candidates, running = running, timestamp = timestamp)
     else:
         data = request.json
         #print(data)
+        if not is_open():
+            return json.dumps({"success":False,"message":"Voting is not currently open!"}), 418, {'ContentType':'application/json'}
+        
         if len(data) == 0:
             log(request.remote_addr + " sent a post request with no data")
             return json.dumps({"success":False}), 418, {'ContentType':'application/json'}
@@ -305,7 +318,7 @@ def voting():
             parsed_output[i["rank"]]=i["name"]
         ballot = list(dict(sorted(parsed_output.items())).values()) #generate ballot from data
         
-        if len(parsed_output) != len(candidates): 
+        if len(parsed_output) != len(candidates):
             invalidated = True
 
         if invalidated: #vote data is somehow broken

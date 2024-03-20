@@ -96,7 +96,7 @@ tr:nth-child(even) {
     background-color: #0005;
 }
 
-.counter {
+#counter {
     color: #f5f5f5;
     font-size: 2em;
     text-align: center;
