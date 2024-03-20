@@ -149,8 +149,10 @@ def list_to_percentages(list):
     
     for i in list:
         total+=int(i)
-    
-    return [str(int(int(i)/total*100))+"%" for i in list]
+    if total == 0:
+        return ["0%" for i in list]
+    else:
+        return [str(int(int(i)/total*100))+"%" for i in list]
 
 
 def calculate_results(): #returns whether winner is determined
