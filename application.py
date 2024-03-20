@@ -156,6 +156,7 @@ def list_to_percentages(list):
 def calculate_results(): #returns whether winner is determined
 #TODO fix the bit spaghet code
     log("Calculating current voting results...")
+    removed = []
     losers = []
     votes = {}
     for i in candidates:
@@ -183,7 +184,9 @@ def calculate_results(): #returns whether winner is determined
         for i in losers: #remove losers from counted votes, cause their final results already written
             if i in votes:
                 del votes[i]
-
+    
+    removed = deepcopy(losers)
+    losers.clear()
     
     if len(votes)==1:
         voting_results[list(votes)[0]] = max_votes
@@ -194,8 +197,8 @@ def calculate_results(): #returns whether winner is determined
     running = True
     while running:
         for i in ballots:
-            if ballots[i][round-1] in losers: #check if the previous, more preferrable choice has lost already
-                if ballots[i][round] not in losers:
+            if ballots[i][round-1] in removed: #check if the previous, more preferrable choice has lost already
+                if ballots[i][round] not in removed:
                     votes[ballots[i][round]].append(i)
         
         sorted_votes = dict(sorted(votes.items(), key=lambda item: len(item[1]))) #sorted candidates by votes
@@ -222,7 +225,8 @@ def calculate_results(): #returns whether winner is determined
             return True
         
         round+=1
-    print(votes)
+        removed = deepcopy(losers)
+        losers.clear()
 
 
 def check_tie():
@@ -240,7 +244,6 @@ def get_winner():
 def is_open(): #if voting is open
     curr_time = int(datetime.now(timezone.utc).timestamp())
     if curr_time > open_time and curr_time < close_time:
-        print("yee")
         return True
     return False
 
@@ -285,7 +288,6 @@ def voting():
         return render_template("voting.html",ordinals = ordinals,candidates = user_candidates, running = voting_running, timestamp = timestamp)
     else:
         data = request.json
-        #print(data)
         if not is_open():
             return json.dumps({"success":False,"message":"Voting is not currently open!"}), 418, {'ContentType':'application/json'}
         
