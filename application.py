@@ -291,6 +291,7 @@ def voting():
     else:
         data = request.json
         if not is_open():
+            log(request.remote_addr + " tried to vote, but voting isn't open yet")
             return json.dumps({"success":False,"message":"Voting is not currently open!"}), 418, {'ContentType':'application/json'}
         
         if len(data) == 0:
@@ -359,7 +360,10 @@ def results():
 
 #app startup
 
-if __name__ == "__main__":
+def init():
+    global candidates
+    global finns
+    global voting_results
     start_logger()
     
     log("Reading listed candidates from candidates.txt...")
@@ -394,9 +398,16 @@ if __name__ == "__main__":
         if check_tie():
             log("It's currently a tie!")
         else:
-            log("The current winner is "+get_winner()+"!")
+            log("The preliminary winner is "+get_winner()+"!")
     else:
         log("Voting is not open!")
     
+    log("Starting webserver");
+    
+    
+
+
+if __name__ == "__main__":
+    init()
     app.run()
     log("Application closed...")
