@@ -9,7 +9,7 @@ import requests
 app = Flask(__name__)
 
 open_time = 1710936900 #1710885600 #voting open time (seconds since epoch)
-close_time = 1710937180 #1711020720 #1710972000 #voting close time (seconds since epoch)
+close_time = 1810937180 #1711020720 #1710972000 #voting close time (seconds since epoch)
 
 finns = [] #members in the nation of Finland, when the application is started
 candidates = [] #candidates in the election

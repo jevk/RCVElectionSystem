@@ -90,6 +90,7 @@ tr:nth-child(even) {
 
 .voting-sheet {
     margin: 8em 20%;
+    margin-top: 1em;
     padding: 2em;
     border: #fff solid 2px;
     border-radius: 10px;
