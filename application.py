@@ -187,7 +187,8 @@ def calculate_results(): #returns whether winner is determined
             if i in votes:
                 del votes[i]
     
-    removed = deepcopy(losers)
+    for i in losers:
+        removed.append(i)
     losers.clear()
     
     if len(votes)==1:
@@ -227,7 +228,8 @@ def calculate_results(): #returns whether winner is determined
             return True
         
         round+=1
-        removed = deepcopy(losers)
+        for i in losers:
+            removed.append(i)
         losers.clear()
 
 
