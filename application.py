@@ -1,16 +1,15 @@
 from flask import *
-from datetime import datetime
+from datetime import datetime, timezone
 from random import shuffle
 from copy import deepcopy
-from random import shuffle
 import os
 import json
 import requests
 
 app = Flask(__name__)
 
-open_time = 1710972000 #1710885600 #voting open time (seconds since epoch)
-close_time = 1710885600 #1710972000 #voting close time (seconds since epoch)
+open_time = 1710936900 #1710885600 #voting open time (seconds since epoch)
+close_time = 1710937180 #1711020720 #1710972000 #voting close time (seconds since epoch)
 
 finns = [] #members in the nation of Finland, when the application is started
 candidates = [] #candidates in the election
@@ -32,7 +31,7 @@ def start_logger():
     if not os.path.exists("log"):
         print("Log directory not found, creating...")
         os.makedirs("log")
-    logfile = "log/"+datetime.utcnow().strftime("%Y-%m-%d-%H-%M-%S-%f")[:-3]+".txt" #log file name is timestamped
+    logfile = "log/"+datetime.now(timezone.utc).strftime("%Y-%m-%d-%H-%M-%S-%f")[:-3]+".txt" #log file name is timestamped
     with open(logfile, "x") as file:
         file.write("-------------------------------Log start-------------------------------\n")
     print("Logger initialized successfully!")
@@ -43,7 +42,7 @@ def log(input): #we want to only log outputs from the actual voting site flask o
 
     print(input)
     with open(logfile, "a") as file:
-        file.write(datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S ")+input+"\n")
+        file.write(datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S ")+input+"\n")
 
 
 
@@ -63,7 +62,7 @@ def file_setup():
 unwritten = [] #cannot write into csv file if it is open in excel, postpone for writing later
 def write_results(ip,username,ballot):
     file_setup()
-    data_to_write = [datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"),ip,username]
+    data_to_write = [datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S"),ip,username]
     for i in ballot:
         data_to_write.append(i)
         
@@ -75,7 +74,7 @@ def write_results(ip,username,ballot):
                 log("Writing postponed vote: "+str(i)+" into file...")
                 file.write(",".join(i)+"\n")    
                 log("Success!")
-                removequeue.append(i)    
+                removequeue.append(i)
             log("Writing current vote into file...")
             file.write(",".join(data_to_write)+"\n")
         log("All votes written into file succesfully!")
@@ -239,24 +238,26 @@ def get_winner():
 
 
 def is_open(): #if voting is open
-    curr_time = datetime.now().timestamp()
+    curr_time = int(datetime.now(timezone.utc).timestamp())
     if curr_time > open_time and curr_time < close_time:
+        print("yee")
         return True
     return False
 
 def open_delta(): #get time delta to opening time or from opening time in seconds
-    curr_time = int(datetime.now().timestamp())
+    curr_time = int(datetime.now(timezone.utc).timestamp())
     if curr_time < open_time:
         return open_time-curr_time
     if curr_time > close_time: #will be negative to indicate that voting is closed
         return close_time-curr_time
 
 def open_timestamp(): #returns either the timestamp when the voting opens or when it closes
-    curr_time = int(datetime.now().timestamp())
+    curr_time = int(datetime.now(timezone.utc).timestamp())
     if curr_time < open_time:
         return open_time
     if curr_time > close_time:
         return close_time
+    return 0
 
 
 
@@ -274,14 +275,14 @@ def voting():
             ordinals = [ordinal(i+1) for i in range(len(candidates))] #generate ordinals for all table rows
             user_candidates = deepcopy(candidates) #so python won't create a pointer, but creates an actual separate list
             shuffle(user_candidates)
-            running = True
+            voting_running = True
             timestamp = 0
         else:
             ordinals = []
             user_candidates = []
-            running = False
+            voting_running = False
             timestamp = open_timestamp()*1000 #cause JS works with milliseconds
-        return render_template("voting.html",ordinals = ordinals,candidates = user_candidates, running = running, timestamp = timestamp)
+        return render_template("voting.html",ordinals = ordinals,candidates = user_candidates, running = voting_running, timestamp = timestamp)
     else:
         data = request.json
         #print(data)
@@ -391,11 +392,7 @@ if __name__ == "__main__":
         else:
             log("The current winner is "+get_winner()+"!")
     else:
-        log("Voting is not open anymore!")
-        if check_tie():
-            log("It's a tie!")
-        else:
-            log("And the winner is "+get_winner()+"!")
+        log("Voting is not open!")
     
     app.run()
     log("Application closed...")

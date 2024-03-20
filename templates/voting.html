@@ -3,7 +3,7 @@
     <head>
         <title>Prime Minister Elections</title>
         <link rel="stylesheet" type="text/css" href="static/style.css">
-        <script src="static/script.js"></script>
+        <script src="static/submitscript.js"></script>
     </head>
     <body>
         <section>
@@ -42,70 +42,7 @@
                     <h1 class="title">Voting is not currently open!</h1>
                     <h2 id="counter">{{timestamp}}</h2>
                     <!-- Counter updating script -->
-                    <script>
-                        function getMinutes(delta){
-                            return parseInt(delta/60);
-                        }
-                        function getHours(delta){
-                            return parseInt(delta/60/60);
-                        }
-                        function getDays(delta){
-                            return parseInt(delta/60/60/24);
-                        }
-                        function getWeeks(delta){
-                            return parseInt(delta/60/60/24/7);
-                        }
-                        function needsS(number)
-                        {
-                            if (number == 1){
-                                return "";
-                            }
-                            return "s";
-                        }
-                        
-                        function generateDelta(delta) //why do I have to do this myself
-                        {
-                            weeks = getWeeks(delta);
-                            days = getDays(delta)-weeks*7;
-                            hours = getHours(delta)-(weeks*7+days)*24;
-                            minutes = getMinutes(delta)-((weeks*7+days)*24+hours)*60;
-                            seconds = delta-(((weeks*7+days)*24+hours)*60+minutes)*60;
-                            
-                            let buildString = "";
-                            if (weeks>0){
-                                buildString = buildString + weeks.toString()+" week"+needsS(weeks)+", ";
-                            }
-                            if (days>0){
-                                buildString = buildString + days.toString()+" day"+needsS(days)+", ";
-                            }
-                            if (hours>0){
-                                buildString = buildString + hours.toString()+" hour"+needsS(hours)+", ";
-                            }
-                            if (minutes>0){
-                                buildString = buildString + minutes.toString()+" minute"+needsS(minutes)+", ";
-                            }
-                            
-                            buildString = buildString + seconds.toString()+" second"+needsS(seconds);
-                            
-                            return buildString;
-                        }
-                        
-                        let timeStamp = parseInt(document.getElementById("counter").innerText);
-                        function updateDelta()
-                        {
-                            let delta = parseInt((timeStamp - Date.now())/1000); //delta to date in seconds
-
-                            if (delta<0)
-                            {
-                                document.getElementById("counter").innerText = generateDelta(-delta).concat(" since voting closed");
-                            }
-                            else if (delta>0)
-                            {
-                                document.getElementById("counter").innerText = generateDelta(delta).concat(" until voting opens");
-                            }
-                        }
-                        var t = setInterval(updateDelta,1000);
-                    </script>
+                    <script src="static/timescript.js"></script>
                 </div>
             {% endif %}
         </section>
