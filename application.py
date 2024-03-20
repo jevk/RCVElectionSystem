@@ -39,10 +39,10 @@ def start_logger():
 
 def log(input): #we want to only log outputs from the actual voting site flask output, so I'm doing this'
     global logfile
-
-    print(input)
+    curr_time = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S ")
+    print(curr_time+"[VotingSite] "+input) #print output lookin like a minecraft server
     with open(logfile, "a") as file:
-        file.write(datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S ")+input+"\n")
+        file.write(curr_time+input+"\n")
 
 
 
