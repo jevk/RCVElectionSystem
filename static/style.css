@@ -96,6 +96,14 @@ tr:nth-child(even) {
     background-color: #0005;
 }
 
+.counter {
+    color: #f5f5f5;
+    font-size: 2em;
+    text-align: center;
+    margin: 2em;
+    font-family: Dubai Light;
+}
+
 .radio-btn {
     /* make the radio button circle big */
     width: 2em;

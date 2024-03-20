@@ -2,14 +2,15 @@ from flask import *
 from datetime import datetime
 from random import shuffle
 from copy import deepcopy
+from random import shuffle
 import os
 import json
 import requests
 
 app = Flask(__name__)
 
-open_time = 0 #voting open time (seconds since epoch)
-close_time = 0 #voting close time (seconds since epoch)
+open_time = 1710885600 #voting open time (seconds since epoch)
+close_time = 1710972000 #voting close time (seconds since epoch)
 
 finns = [] #members in the nation of Finland, when the application is started
 candidates = [] #candidates in the election
@@ -123,7 +124,7 @@ def get_ballots():
 def check_finland_name(name): #Returns false if person is a part of finland
     if name in finns:
         return False
-    return True
+    return True        
 
 def check_voted_name(name): #Returns false if person hasn't already voted
     if name not in voted_names:
@@ -181,7 +182,9 @@ def calculate_results(): #returns whether winner is determined
                 losers.append(i)
         log("Round 1 voting results are: "+str({i:len(votes[i]) for i in votes})+" with the loser(s) being: "+", ".join(losers))
         for i in losers: #remove losers from counted votes, cause their final results already written
-            del votes[i]
+            if i in votes:
+                del votes[i]
+
     
     if len(votes)==1:
         voting_results[list(votes)[0]] = max_votes
@@ -212,7 +215,8 @@ def calculate_results(): #returns whether winner is determined
                     losers.append(i)
             log("Round "+str(round+1)+" voting results are: "+str({i:len(votes[i]) for i in votes})+" with the loser(s) being: "+", ".join(losers))
             for i in losers: #remove losers from counted votes, cause their final results already written
-                del votes[i]
+                if i in votes:
+                    del votes[i]
         
         if len(votes)==1:
             voting_results[list(votes)[0]] = max_votes
@@ -234,8 +238,18 @@ def get_winner():
     return (sorted(voting_results.items(), key=lambda item: item[1]))[-1][0]
 
 
+def is_open(): #if voting is open
+    curr_time = datetime.now().timestamp()
+    if curr_time > open_time and curr_time < close_time:
+        return True
+    return False
 
-
+def open_delta(): #get time delta to opening time or from opening time in seconds
+    curr_time = int(datetime.now().timestamp())
+    if curr_time < open_time:
+        return open_time-curr_time
+    if curr_time > close_time: #will be negative to indicate that voting is closed
+        return close_time-curr_time
 #flask logic    
 
 @app.errorhandler(404) #redirect all other pages to results
@@ -246,9 +260,18 @@ def go_to_results(e):
 @app.route("/vote", methods=['GET', 'POST']) #voting page
 def voting():
     if request.method == "GET":
-        ordinals = [ordinal(i+1) for i in range(len(candidates))] #generate ordinals for all table rows
-        user_candidates = deepcopy(candidates) #so python won't create a pointer, but creates an actual separate list
-        return render_template("voting.html",ordinals=ordinals,candidates=user_candidates)
+        if is_open():
+            ordinals = [ordinal(i+1) for i in range(len(candidates))] #generate ordinals for all table rows
+            user_candidates = deepcopy(candidates) #so python won't create a pointer, but creates an actual separate list
+            shuffle(user_candidates)
+            running = True
+            delta = 0
+        else:
+            ordinals = []
+            user_candidates = []
+            running = False
+            delta = open_delta() #TODO - pass timestamp instead and have a javascript script do the counting
+        return render_template("voting.html",ordinals = ordinals,candidates = user_candidates, running = running, delta = delta)
     else:
         data = request.json
         #print(data)
@@ -280,7 +303,7 @@ def voting():
             if i["name"] not in candidates: #if incorrect candidate
                 invalidated = True
             parsed_output[i["rank"]]=i["name"]
-        ballot = dict(sorted(parsed_output.items())).values() #generate ballot from data
+        ballot = list(dict(sorted(parsed_output.items())).values()) #generate ballot from data
         
         if len(parsed_output) != len(candidates): 
             invalidated = True
@@ -296,15 +319,22 @@ def voting():
         ballots[username] = ballot
         log(username+" has submitted their ballot: "+str(ballot))
         
+        calculate_results()
+        
         return json.dumps({"success":True,"message":"Your vote has been counted!"}), 200, {'ContentType':'application/json'}
 
 
 @app.route("/results") #results page
 def results():
-
-    vote_values = [1,2,3,4]
+    resulting_candidates = []
+    vote_values = []
+    
+    for i in dict(sorted(voting_results.items(), key = lambda item: item[1], reverse = True)):
+        resulting_candidates.append(i)
+        vote_values.append(voting_results[i])
+    
     percentages = list_to_percentages(vote_values)
-    return render_template("results.html",candidates=candidates,results=vote_values, percentages=percentages)
+    return render_template("results.html",candidates=resulting_candidates,results=vote_values, percentages=percentages)
 
 
 
@@ -334,17 +364,25 @@ if __name__ == "__main__":
         log("Something went wrong with getting nation members: "+traceback.format_exc()+" exiting...")
         exit()
     
-        
+    #get data and calculate results
     get_previous_voters()
-    #for i in range(len(candidates)):
-    #   raw_results[i] = []
     get_ballots()
     calculate_results()
-    log("Current results are: "+str(voting_results))
-    if check_tie():
-        log("It's currently a tie!")
+    
+    #output current results
+    if is_open():
+        log("Voting is still open!")
+        log("Current results are: "+str(voting_results))
+        if check_tie():
+            log("It's currently a tie!")
+        else:
+            log("The current winner is "+get_winner()+"!")
     else:
-        log("The current winner is "+get_winner()+"!")
+        log("Voting is not open anymore!")
+        if check_tie():
+            log("It's a tie!")
+        else:
+            log("And the winner is "+get_winner()+"!")
+    
     app.run()
-     #vote count of each candidate in every roun
     log("Application closed...")
