@@ -53,6 +53,7 @@ def file_setup():
     if not os.path.exists("results.csv"):
        log("Results file doesn't exist, creating...")
        with open("results.csv","x") as file:
+           file.write("sep=,\n") #add separator character def to the start file so excel parses it correctly
            f_line="Timestamp,IP,voter name,"
            for i in range(len(candidates)):
                f_line+=ordinal(i+1)+" choice,"
@@ -108,7 +109,7 @@ def get_ballots():
         log("Getting results from file...")
         with open("results.csv","r") as file:
             lines = file.readlines()
-            for line in lines[1:]:
+            for line in lines[2:]:
                 split_line = line.strip("\n").split(",")
                 ballots[split_line[2]] = [split_line[i] for i in range(3,3+len(candidates))]
             log("Current ballots: "+str(ballots))
