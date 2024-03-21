@@ -190,7 +190,6 @@ def calculate_results(): #returns whether winner is determined
     
     for i in losers:
         removed.append(i)
-    losers.clear()
     
     if len(votes)==1:
         voting_results[list(votes)[0]] = max_votes
@@ -201,9 +200,13 @@ def calculate_results(): #returns whether winner is determined
     running = True
     while running:
         for i in ballots:
-            if ballots[i][round-1] in removed: #check if the previous, more preferrable choice has lost already
-                if ballots[i][round] not in removed:
-                    votes[ballots[i][round]].append(i)
+            if ballots[i][0] in losers: #check if first choice was removed already
+                for e in range(1,len(ballots[i])): #find next choice that is not eliminated already
+                    if ballots[i][e] not in removed:
+                        votes[ballots[i][e]].append(i)
+                        break
+        
+        losers.clear()
         
         sorted_votes = dict(sorted(votes.items(), key=lambda item: len(item[1]))) #sorted candidates by votes
         min_votes = len(list(sorted_votes.values())[0])
@@ -231,7 +234,6 @@ def calculate_results(): #returns whether winner is determined
         round+=1
         for i in losers:
             removed.append(i)
-        losers.clear()
 
 
 def check_tie():
