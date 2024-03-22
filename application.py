@@ -59,6 +59,7 @@ def file_setup():
            file.write(f_line+"\n")
        log("Results file creation successful!")
 
+
 unwritten = [] #cannot write into csv file if it is open in excel, postpone for writing later
 def write_results(ip,username,ballot):
     file_setup()
@@ -119,16 +120,17 @@ def get_ballots():
 
 #vote validation logic
 
-
 def check_finland_name(name): #Returns false if person is a part of finland
     if name in finns:
         return False
     return True        
 
+
 def check_voted_name(name): #Returns false if person hasn't already voted
     if name not in voted_names:
         return False
     return True
+
 
 def check_voted_ip(ip): #Returns false if an ip hasn't already voted
     if ip not in voted_ips:
@@ -249,20 +251,22 @@ def is_open(): #if voting is open
         return True
     return False
 
-def open_delta(): #get time delta to opening time or from opening time in seconds
-    curr_time = int(datetime.now(timezone.utc).timestamp())
-    if curr_time < open_time:
-        return open_time-curr_time
-    if curr_time > close_time: #will be negative to indicate that voting is closed
-        return close_time-curr_time
 
 def open_timestamp(): #returns either the timestamp when the voting opens or when it closes
     curr_time = int(datetime.now(timezone.utc).timestamp())
     if curr_time < open_time:
         return open_time
-    if curr_time > close_time:
-        return close_time
-    return 0
+    return close_time
+
+
+def which_timestamp(): #returns which timestamp was returned
+    curr_time = int(datetime.now(timezone.utc).timestamp())
+    if curr_time < open_time:
+        return "open"
+    elif curr_time > close_time:
+        return "close"
+    return "running"
+
 
 
 
