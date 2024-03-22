@@ -3,14 +3,23 @@
     <head>
         <title>Prime Minister Elections</title>
         <link rel="stylesheet" type="text/css" href="../static/style.css">
-        <link href="https://fonts.cdnfonts.com/css/dubai" rel="stylesheet">
     </head>
     <body>
         <section>
             <!-- Finnish flag and coat of arms decoration -->
             <div class="container">
                 <div class="flag"></div>
-                <h1 class="title">Prime Minister Election Results</h1>
+                <div>
+                    {% if w_timestamp != "close" %}
+                    <h1 class="title">Prime Minister Election Preliminary Results</h1>
+                    {% else %}
+                    <h1 class="title">Prime Minister Election Final Results</h1>
+                    {% endif %}
+                    <div style="text-align:center;">
+                        <a id="counter">{{timestamp}} {{w_timestamp}}</a>
+                    </div>
+
+                </div>
                 <div class="coat"></div>
             </div>
         </section>
@@ -26,4 +35,6 @@
             </div>
         </section>
     </body>
+    <!-- Counter updating script -->
+    <script src="static/timescript.js"></script>
 </html>

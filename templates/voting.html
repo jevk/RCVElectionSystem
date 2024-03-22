@@ -2,7 +2,6 @@
 <html>
     <head>
         <title>Prime Minister Elections</title>
-        <link href="https://fonts.googleapis.com/css?family=Dubai" rel="stylesheet">
         <link rel="stylesheet" type="text/css" href="static/style.css">
         <script src="static/submitscript.js"></script>
     </head>
@@ -11,13 +10,20 @@
             <!-- Finnish flag and coat of arms decoration -->
             <div class="container">
                 <div class="flag"></div>
-                <h1 class="title">Prime Minister Voting Sheet</h1>
+                <div>
+                    <h1 class="title">Prime Minister Voting Sheet</h1>
+                    {% if w_timestamp == "running" %}
+                    <div style="text-align:center;">
+                        <a id="counter">{{timestamp}} {{w_timestamp}}</a>
+                    </div>
+                    {% endif %}
+                </div>
                 <div class="coat"></div>
             </div>
         </section>
 
         <section>
-            {% if running %}
+            {% if w_timestamp == "running" %}
             <div class="voting-sheet">
                 <table>
                     <tr>
@@ -42,10 +48,10 @@
                 <div>
                     <h1 class="title">Voting is not currently open!</h1>
                     <h2 id="counter">{{timestamp}} {{w_timestamp}}</h2>
-                    <!-- Counter updating script -->
-                    <script src="static/timescript.js"></script>
                 </div>
             {% endif %}
         </section>
     </body>
+    <!-- Counter updating script -->
+    <script src="static/timescript.js"></script>
 </html>

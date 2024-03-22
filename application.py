@@ -8,7 +8,7 @@ import requests
 
 app = Flask(__name__)
 
-open_time = 1711972000 #1710885600 #voting open time (seconds since epoch)
+open_time = 1710972000 #1710885600 #voting open time (seconds since epoch)
 close_time = 1711144800 #1711020720 #1710972000 #voting close time (seconds since epoch)
 
 finns = [] #members in the nation of Finland, when the application is started
@@ -289,16 +289,14 @@ def voting():
             ordinals = [ordinal(i+1) for i in range(len(candidates))] #generate ordinals for all table rows
             user_candidates = deepcopy(candidates) #so python won't create a pointer, but creates an actual separate list
             shuffle(user_candidates)
-            voting_running = True
-            timestamp = open_timestamp()*1000
-            w_timestamp = which_timestamp() #which timestamp is given
         else:
             ordinals = []
             user_candidates = []
-            voting_running = False
-            timestamp = open_timestamp()*1000 #cause JS works with milliseconds
-            w_timestamp = which_timestamp() #which timestamp is given
-        return render_template("voting.html",ordinals = ordinals,candidates = user_candidates, running = voting_running, timestamp = timestamp, w_timestamp = w_timestamp)
+        
+        timestamp = open_timestamp()*1000 #cause JS works with milliseconds
+        w_timestamp = which_timestamp() #which timestamp is given
+        
+        return render_template("voting.html",ordinals = ordinals,candidates = user_candidates, timestamp = timestamp, w_timestamp = w_timestamp)
     else:
         data = request.json
         if not is_open():
@@ -364,7 +362,10 @@ def results():
         vote_values.append(voting_results[i])
     
     percentages = list_to_percentages(vote_values)
-    return render_template("results.html",candidates=resulting_candidates,results=vote_values, percentages=percentages)
+    timestamp = open_timestamp()*1000 #cause JS works with milliseconds
+    w_timestamp = which_timestamp() #which timestamp is given
+    
+    return render_template("results.html", candidates=resulting_candidates, results=vote_values, percentages=percentages, timestamp = timestamp, w_timestamp=w_timestamp)
 
 
 
