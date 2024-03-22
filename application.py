@@ -290,14 +290,15 @@ def voting():
             user_candidates = deepcopy(candidates) #so python won't create a pointer, but creates an actual separate list
             shuffle(user_candidates)
             voting_running = True
-            timestamp = 0
+            timestamp = open_timestamp()*1000
+            w_timestamp = which_timestamp() #which timestamp is given
         else:
             ordinals = []
             user_candidates = []
             voting_running = False
             timestamp = open_timestamp()*1000 #cause JS works with milliseconds
-            which = which_timestamp() #which timestamp is given
-        return render_template("voting.html",ordinals = ordinals,candidates = user_candidates, running = voting_running, timestamp = timestamp, which = which)
+            w_timestamp = which_timestamp() #which timestamp is given
+        return render_template("voting.html",ordinals = ordinals,candidates = user_candidates, running = voting_running, timestamp = timestamp, w_timestamp = w_timestamp)
     else:
         data = request.json
         if not is_open():
