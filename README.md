@@ -16,6 +16,7 @@ The site is currently live at [vote.cumzon.ee](http://vote.cumzon.ee).
 ## Disclaimers
 - Currently only supports HTTP, HTTPS support is planned in the future
 - The code is written in a hurry in about 2.5 days and may have a lot of bugs. If problems occur, please open an issue [here](https://github.com/SpartanJ/ecode/issues)
+- Most likely won't run on Linux on port 80 without sudo perms
 
 ## Credits:
 Frontend by [Jevk](https://github.com/jevk)
