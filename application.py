@@ -176,7 +176,7 @@ def calculate_results(): #returns whether winner is determined
     max_votes = len(list(sorted_votes.values())[-1])
     
     if min_votes == max_votes: #complete tie
-        for i in candidates:
+        for i in votes:
             voting_results[i] = min_votes
         log("Round 1 ends with a tie: "+str({i:len(votes[i]) for i in votes}))
         return False
@@ -213,9 +213,9 @@ def calculate_results(): #returns whether winner is determined
         sorted_votes = dict(sorted(votes.items(), key=lambda item: len(item[1]))) #sorted candidates by votes
         min_votes = len(list(sorted_votes.values())[0])
         max_votes = len(list(sorted_votes.values())[-1])
-
+        
         if min_votes == max_votes: #complete tie
-            for i in candidates:
+            for i in votes:
                 voting_results[i] = min_votes
             log("Round "+str(round+1)+" ends with a tie: "+str({i:len(votes[i]) for i in votes}))
             return False
