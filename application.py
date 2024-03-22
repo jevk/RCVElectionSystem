@@ -291,7 +291,8 @@ def voting():
             user_candidates = []
             voting_running = False
             timestamp = open_timestamp()*1000 #cause JS works with milliseconds
-        return render_template("voting.html",ordinals = ordinals,candidates = user_candidates, running = voting_running, timestamp = timestamp)
+            which = which_timestamp() #which timestamp is given
+        return render_template("voting.html",ordinals = ordinals,candidates = user_candidates, running = voting_running, timestamp = timestamp, which = which)
     else:
         data = request.json
         if not is_open():

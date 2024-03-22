@@ -47,26 +47,34 @@ function generateDelta(delta) //why do I have to do this myself
 }
 
 
-let timeStamp = parseInt(document.getElementById("counter").innerText); //timestamp will be placed inside the counter element on page load
+let timeStamp = parseInt(document.getElementById("counter").innerText.split()[0]); //timestamp will be placed inside the counter element on page load
+let which = parseInt(document.getElementById("counter").innerText.split()[1]);
 function updateDelta()
 {
     let delta = parseInt((timeStamp - new Date().getTime())/1000); //delta to date in seconds
     
-    if (delta<0)
+    if (which == "close")
     {
-        document.getElementById("counter").innerText = generateDelta(-delta).concat(" since voting closed");
+        document.getElementById("counter").innerText = generateDelta(delta).concat(" since voting closed");
     }
-    else if (delta>0)
+    else if (which == "open")
     {
         document.getElementById("counter").innerText = generateDelta(delta).concat(" until voting opens");
     }
-    else if (delta == 0)
+    else if (which == "running")
     {
+        document.getElementById("counter").innerText = generateDelta(delta).concat(" until voting closes");
+    }
+    
+    if (delta <= 0)
+    {    
         document.getElementById("counter").style.visibility = "hidden";
         setTimeout(function() {
             location.reload(true);
         }, 1000*Math.random()*10+1000); //random, to eliminate the biggest spikes
     }
 }
+
+
 updateDelta();
 var t = setInterval(updateDelta,1000);
