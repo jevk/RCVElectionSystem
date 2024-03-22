@@ -39,10 +39,10 @@ def start_logger():
 
 def log(input): #we want to only log outputs from the actual voting site flask output, so I'm doing this'
     global logfile
-
-    print(input)
+    curr_time = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S ")
+    print(curr_time+"[VotingSite] "+input) #print output lookin like a minecraft server
     with open(logfile, "a") as file:
-        file.write(datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S ")+input+"\n")
+        file.write(curr_time+input+"\n")
 
 
 
@@ -53,6 +53,7 @@ def file_setup():
     if not os.path.exists("results.csv"):
        log("Results file doesn't exist, creating...")
        with open("results.csv","x") as file:
+           file.write("sep=,\n") #add separator character def to the start file so excel parses it correctly
            f_line="Timestamp,IP,voter name,"
            for i in range(len(candidates)):
                f_line+=ordinal(i+1)+" choice,"
@@ -109,7 +110,7 @@ def get_ballots():
         log("Getting results from file...")
         with open("results.csv","r") as file:
             lines = file.readlines()
-            for line in lines[1:]:
+            for line in lines[2:]:
                 split_line = line.strip("\n").split(",")
                 ballots[split_line[2]] = [split_line[i] for i in range(3,3+len(candidates))]
             log("Current ballots: "+str(ballots))
@@ -189,8 +190,8 @@ def calculate_results(): #returns whether winner is determined
             if i in votes:
                 del votes[i]
     
-    removed = deepcopy(losers)
-    losers.clear()
+    for i in losers:
+        removed.append(i)
     
     if len(votes)==1:
         voting_results[list(votes)[0]] = max_votes
@@ -201,9 +202,13 @@ def calculate_results(): #returns whether winner is determined
     running = True
     while running:
         for i in ballots:
-            if ballots[i][round-1] in removed: #check if the previous, more preferrable choice has lost already
-                if ballots[i][round] not in removed:
-                    votes[ballots[i][round]].append(i)
+            if ballots[i][0] in losers: #check if first choice was removed already
+                for e in range(1,len(ballots[i])): #find next choice that is not eliminated already
+                    if ballots[i][e] not in removed:
+                        votes[ballots[i][e]].append(i)
+                        break
+        
+        losers.clear()
         
         sorted_votes = dict(sorted(votes.items(), key=lambda item: len(item[1]))) #sorted candidates by votes
         min_votes = len(list(sorted_votes.values())[0])
@@ -229,8 +234,8 @@ def calculate_results(): #returns whether winner is determined
             return True
         
         round+=1
-        removed = deepcopy(losers)
-        losers.clear()
+        for i in losers:
+            removed.append(i)
 
 
 def check_tie():
@@ -296,6 +301,7 @@ def voting():
     else:
         data = request.json
         if not is_open():
+            log(request.remote_addr + " tried to vote, but voting isn't open yet")
             return json.dumps({"success":False,"message":"Voting is not currently open!"}), 418, {'ContentType':'application/json'}
         
         if len(data) == 0:
@@ -304,16 +310,16 @@ def voting():
         
         if check_voted_ip(request.remote_addr):
             log(request.remote_addr + " tried to vote twice, raw data: " + str(data))
-            return json.dumps({"success":True,"message":"This IP has already been used to vote"}), 418, {'ContentType':'application/json'}
+            return json.dumps({"success":False,"message":"This IP has already been used to vote"}), 418, {'ContentType':'application/json'}
 
         username = data.get("voterName").lower()
         if check_voted_name(username):
             log(username + " tried to vote twice, this time at IP " + request.remote_addr + " raw data: "+ str(data))
-            return json.dumps({"success":True,"message":"This username has already been used to vote"}), 418, {'ContentType':'application/json'}
+            return json.dumps({"success":False,"message":"This username has already been used to vote"}), 418, {'ContentType':'application/json'}
         
         if check_finland_name(username):
             log(username + " tried to vote, but is not a part of Finland. IP: " + request.remote_addr + " raw data: "+ str(data))
-            return json.dumps({"success":True,"message":"This username is not in a Finnish town"}), 418, {'ContentType':'application/json'}
+            return json.dumps({"success":False,"message":"This username is not in a Finnish town"}), 418, {'ContentType':'application/json'}
         
         
         voting_data = data.get("candidates") #get ballot data from incoming json
@@ -364,7 +370,10 @@ def results():
 
 #app startup
 
-if __name__ == "__main__":
+def init():
+    global candidates
+    global finns
+    global voting_results
     start_logger()
     
     log("Reading listed candidates from candidates.txt...")
@@ -399,9 +408,16 @@ if __name__ == "__main__":
         if check_tie():
             log("It's currently a tie!")
         else:
-            log("The current winner is "+get_winner()+"!")
+            log("The preliminary winner is "+get_winner()+"!")
     else:
         log("Voting is not open!")
     
+    log("Starting webserver");
+    
+    
+
+
+if __name__ == "__main__":
+    init()
     app.run()
     log("Application closed...")

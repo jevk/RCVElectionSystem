@@ -1,3 +1,35 @@
+@font-face {
+font-family: 'Dubai Regular';
+font-style: normal;
+font-weight: normal;
+src: local('Dubai Regular'), url('/static/fonts/Dubai-Regular.woff') format('woff');
+}
+
+
+@font-face {
+font-family: 'Dubai Light';
+font-style: normal;
+font-weight: normal;
+src: local('Dubai Light'), url('/static/fonts/Dubai-Light.woff') format('woff');
+}
+
+
+@font-face {
+font-family: 'Dubai Medium';
+font-style: normal;
+font-weight: normal;
+src: local('Dubai Medium'), url('/static/fonts/Dubai-Medium.woff') format('woff');
+}
+
+
+@font-face {
+font-family: 'Dubai Bold';
+font-style: normal;
+font-weight: normal;
+src: local('Dubai Bold'), url('/static/fonts/Dubai-Bold.woff') format('woff');
+}
+
+
 * {
     background-color: #20182b;
     font-family: Dubai light;
