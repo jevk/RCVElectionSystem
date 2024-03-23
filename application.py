@@ -2,6 +2,7 @@ from flask import *
 from datetime import datetime, timezone
 from random import shuffle
 from copy import deepcopy
+from hashlib import sha256 #how could I have been so fucking stupid as to not do this
 import os
 import json
 import requests
@@ -9,7 +10,7 @@ import requests
 app = Flask(__name__)
 
 open_time = 1710972000 #1710885600 #voting open time (seconds since epoch)
-close_time = 1711144800 #1711020720 #1710972000 #voting close time (seconds since epoch)
+close_time = 17211144800 #1711020720 #1710972000 #voting close time (seconds since epoch)
 
 finns = [] #members in the nation of Finland, when the application is started
 candidates = [] #candidates in the election
@@ -299,25 +300,26 @@ def voting():
         return render_template("voting.html",ordinals = ordinals,candidates = user_candidates, timestamp = timestamp, w_timestamp = w_timestamp)
     else:
         data = request.json
+        eyep = sha256(request.remote_addr.encode()).hexdigest()
         if not is_open():
-            log(request.remote_addr + " tried to vote, but voting isn't open yet")
+            log(eyep + " tried to vote, but voting isn't open yet")
             return json.dumps({"success":False,"message":"Voting is not currently open!"}), 418, {'ContentType':'application/json'}
         
         if len(data) == 0:
-            log(request.remote_addr + " sent a post request with no data")
+            log(eyep + " sent a post request with no data")
             return json.dumps({"success":False}), 418, {'ContentType':'application/json'}
         
-        if check_voted_ip(request.remote_addr):
-            log(request.remote_addr + " tried to vote twice, raw data: " + str(data))
+        if check_voted_ip(str(eyep)):
+            log(eyep + " tried to vote twice, raw data: " + str(data))
             return json.dumps({"success":False,"message":"This IP has already been used to vote"}), 418, {'ContentType':'application/json'}
 
         username = data.get("voterName").lower()
         if check_voted_name(username):
-            log(username + " tried to vote twice, this time at IP " + request.remote_addr + " raw data: "+ str(data))
+            log(username + " tried to vote twice, this time at IP " + eyep + " raw data: "+ str(data))
             return json.dumps({"success":False,"message":"This username has already been used to vote"}), 418, {'ContentType':'application/json'}
         
         if check_finland_name(username):
-            log(username + " tried to vote, but is not a part of Finland. IP: " + request.remote_addr + " raw data: "+ str(data))
+            log(username + " tried to vote, but is not a part of Finland. IP: " + eyep + " raw data: "+ str(data))
             return json.dumps({"success":False,"message":"This username is not in a Finnish town"}), 418, {'ContentType':'application/json'}
         
         
@@ -337,12 +339,12 @@ def voting():
             invalidated = True
 
         if invalidated: #vote data is somehow broken
-            log("How did this happen? "+username+ " at IP" + request.remote_addr + " submitted broken data: " + str(parsed_output)) 
+            log("How did this happen? "+username+ " at IP" + eyep + " submitted broken data: " + str(parsed_output)) 
             return json.dumps({"success":False}), 418, {'ContentType':'application/json'}
         
-        write_results(request.remote_addr,username,ballot)
+        write_results(eyep,username,ballot)
         
-        voted_ips.append(request.remote_addr)
+        voted_ips.append(eyep)
         voted_names.append(username)
         ballots[username] = ballot
         log(username+" has submitted their ballot: "+str(ballot))
