@@ -367,6 +367,13 @@ def results():
     
     return render_template("results.html", candidates=resulting_candidates, results=vote_values, percentages=percentages, timestamp = timestamp, w_timestamp=w_timestamp)
 
+@app.route("/past-elections") #past elections page
+def past_elections():
+    return render_template("past-elections.html")
+
+@app.route("/tos") #terms of service page
+def tos():
+    return render_template("terms.html")
 
 
 
