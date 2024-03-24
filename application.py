@@ -7,6 +7,7 @@ import os
 import json
 import requests
 import traceback
+import logging as pylogging
 
 app = Flask(__name__)
 
@@ -21,28 +22,35 @@ ballots = {} #current ballot data
 voting_results = {} #currently calculated results
 logfile = "" #logfile location
 
+verbose = True
 
 
 
 #logging logic
 
-def start_logger():
+def start_logger(verb):
     global logfile
+    global verbose
     
-    print("Initializing logger...")
+    if not verb:
+        verbose = False
+
+    
+    if verbose: print("Initializing logger...")
     if not os.path.exists("log"):
-        print("Log directory not found, creating...")
+        if verbose: print("Log directory not found, creating...")
         os.makedirs("log")
     logfile = "log/"+datetime.now(timezone.utc).strftime("%Y-%m-%d-%H-%M-%S-%f")[:-3]+".txt" #log file name is timestamped
     with open(logfile, "x") as file:
         file.write("-------------------------------Log start-------------------------------\n")
-    print("Logger initialized successfully!")
+    if verbose: print("Logger initialized successfully!")
 
 
 def log(input): #we want to only log outputs from the actual voting site flask output, so I'm doing this'
     global logfile
     curr_time = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S ")
-    print(curr_time+"[VotingSite] "+input) #print output lookin like a minecraft server
+    if verbose: 
+        print(curr_time+"[VotingSite] "+input) #print output lookin like a minecraft server
     with open(logfile, "a") as file:
         file.write(curr_time+input+"\n")
 
@@ -417,12 +425,14 @@ def tos():
 
 #app startup
 
-def init():
+def init(verb = True):
     global candidates
     global finns
     global voting_results
     
-    start_logger()
+    pylogging.getLogger('werkzeug').disabled = not verb
+    
+    start_logger(verb)
     get_candidates()
     get_finns()
     
