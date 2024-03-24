@@ -145,6 +145,33 @@ def check_voted_ip(ip): #Returns false if an ip hasn't already voted
 #utility thingies
 
 #ordinal conversion oneliner, stolen from https://codegolf.stackexchange.com/questions/4707/outputting-ordinal-numbers-1st-2nd-3rd#answer-4712
+def get_candidates():
+    global candidates
+
+    log("Reading listed candidates from candidates.txt...")
+    if not os.path.exists("candidates.txt"):
+        log("candidates.txt file doesn't exist, exiting...")
+        exit()
+    with open("candidates.txt","r",encoding="UTF8") as file: #read participating candidates from candidates.txt and parse
+        candidates = [i.replace("\n","") for i in file.readlines()] #remove line endings
+        if len(candidates) == 0:
+            log("no candidates listed, exiting...")
+            exit()
+        log("Listed candidates are: "+", ".join(candidates))
+
+
+def get_finns():
+    global finns
+
+    log("Getting members in Finland...")
+    try:
+        finns = [i.lower() for i in requests.get("https://api.earthmc.net/v2/aurora/nations/Finland").json()["residents"]]
+        log("Current members of the nation are: "+", ".join(finns))
+    except:
+        log("Something went wrong with getting nation members: "+traceback.format_exc()+" exiting...")
+        exit()
+
+
 ordinal = lambda n: "%d%s" % (n,"tsnrhtdd"[(n//10%10!=1)*(n%10<4)*n%10::4])
 
 
@@ -369,13 +396,16 @@ def results():
     
     return render_template("results.html", candidates=resulting_candidates, results=vote_values, percentages=percentages, timestamp = timestamp, w_timestamp=w_timestamp)
 
+
 @app.route("/past-elections") #past elections page
 def past_elections():
     return render_template("past-elections.html")
 
+
 @app.route("/tos") #terms of service page
 def tos():
     return render_template("terms.html")
+
 
 
 
@@ -385,27 +415,10 @@ def init():
     global candidates
     global finns
     global voting_results
+    
     start_logger()
-    
-    log("Reading listed candidates from candidates.txt...")
-    if not os.path.exists("candidates.txt"):
-        log("candidates.txt file doesn't exist, exiting...")
-        exit()
-    with open("candidates.txt","r",encoding="UTF8") as file: #read participating candidates from candidates.txt and parse
-        candidates = [i.replace("\n","") for i in file.readlines()] #remove line endings
-        if len(candidates) == 0:
-            log("no candidates listed, exiting...")
-            exit()
-        log("Listed candidates are: "+", ".join(candidates))
-    
-    
-    log("Getting members in Finland...")
-    try:
-        finns = [i.lower() for i in requests.get("https://api.earthmc.net/v2/aurora/nations/Finland").json()["residents"]]
-        log("Current members of the nation are: "+", ".join(finns))
-    except:
-        log("Something went wrong with getting nation members: "+traceback.format_exc()+" exiting...")
-        exit()
+    get_candidates()
+    get_finns()
     
     #get data and calculate results
     get_previous_voters()
@@ -424,9 +437,11 @@ def init():
         log("Voting is not open!")
     
     log("Starting webserver");
-    
-    
 
+
+
+
+#for when testing
 
 if __name__ == "__main__":
     init()
