@@ -2,10 +2,11 @@ from flask import *
 from datetime import datetime, timezone
 from random import shuffle
 from copy import deepcopy
-from hashlib import sha256 #how could I have been so fucking stupid as to not do this
+from hashlib import sha256
 import os
 import json
 import requests
+import traceback
 
 app = Flask(__name__)
 
@@ -144,7 +145,6 @@ def check_voted_ip(ip): #Returns false if an ip hasn't already voted
 
 #utility thingies
 
-#ordinal conversion oneliner, stolen from https://codegolf.stackexchange.com/questions/4707/outputting-ordinal-numbers-1st-2nd-3rd#answer-4712
 def get_candidates():
     global candidates
 
@@ -165,13 +165,19 @@ def get_finns():
 
     log("Getting members in Finland...")
     try:
-        finns = [i.lower() for i in requests.get("https://api.earthmc.net/v2/aurora/nations/Finland").json()["residents"]]
+        #here's the API v2 implementation if you want to use that for some reason
+        #finns = [i.lower() for i in requests.get("https://api.earthmc.net/v2/aurora/nations/Finland").json()["residents"]]
+        
+        #and here's the API v3 implementation
+        raw_residents = requests.get("https://api.earthmc.net/v3/aurora/nations/?query=e08ba27e-7179-4b5b-b1b3-b15a117f7ae8").json()[0]["residents"]
+        finns = [i["name"].lower() for i in raw_residents]
         log("Current members of the nation are: "+", ".join(finns))
     except:
         log("Something went wrong with getting nation members: "+traceback.format_exc()+" exiting...")
         exit()
 
 
+#ordinal conversion oneliner, stolen from https://codegolf.stackexchange.com/questions/4707/outputting-ordinal-numbers-1st-2nd-3rd#answer-4712
 ordinal = lambda n: "%d%s" % (n,"tsnrhtdd"[(n//10%10!=1)*(n%10<4)*n%10::4])
 
 
