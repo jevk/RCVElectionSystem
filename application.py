@@ -26,6 +26,7 @@ verbose = True
 
 
 
+
 #logging logic
 
 def start_logger(verb):
