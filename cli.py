@@ -1,6 +1,8 @@
 from waitress_server import run, application
 from _thread import start_new_thread
 from datetime import datetime
+import os
+
 
 
 
@@ -60,16 +62,39 @@ def get_names(*args):
 def get_ips(*args):
     """Get ip hashes of people who've already voted"""
     print("Ip hashses which have been used to vote:",application.voted_ips)
-    
-    
+
+
 def get_ballots(*args):
     """Get currently submitted ballots"""
     print("Current ballots:\n","\n".join([i+": "+str(application.ballots[i]) for i in application.ballots]))
-    
-    
+
+
 def get_results(*args):
     """Get currently calculated results"""
     print("Current results:",application.voting_results)
+
+
+def archive_election(*args):
+    """Clear IP addresses from the table and move it to the archive"""
+    if not os.path.exists("results.csv"):
+       print("Results file doesn't exist")
+    else:
+        print("Results file found, removing IP hashes...")
+        final_lines = []
+        with open("results.csv","r+") as file:
+            lines = file.readlines()
+            print(lines)
+            for i in range(2,len(lines)):
+                line = lines[i].split(",")
+                line[1] = "-"
+                lines[i] = line
+            final_lines = lines
+            
+        if not os.path.exists("results"):
+            print("Results directory not found, creating...")
+            os.makedirs("results")
+        
+        
 
 
 
@@ -86,7 +111,8 @@ commands = {"exit":exit,
             "getnames":get_names,
             "getips":get_ips,
             "getballots":get_ballots,
-            "getresults":get_results,} #keyword:function
+            "getresults":get_results,
+            "archive":archive_election,} #keyword:function
 def main_loop():
     while True:
         a = input("> ")
