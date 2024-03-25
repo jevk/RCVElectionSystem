@@ -1,6 +1,7 @@
 from waitress_server import run, application
 from _thread import start_new_thread
 from datetime import datetime
+from copy import deepcopy
 import os
 
 
@@ -81,21 +82,32 @@ def archive_election(*args):
     else:
         print("Results file found, removing IP hashes...")
         final_lines = []
-        with open("results.csv","r+") as file:
+        with open("results.csv","r") as file:
             lines = file.readlines()
-            print(lines)
             for i in range(2,len(lines)):
                 line = lines[i].split(",")
                 line[1] = "-"
-                lines[i] = line
-            final_lines = lines
+                lines[i] = ",".join(line)
+            final_lines = deepcopy(lines)
             
         if not os.path.exists("results"):
             print("Results directory not found, creating...")
             os.makedirs("results")
         
+        folder_name = ""
+        folder_name += datetime.fromtimestamp(application.open_time).strftime("%d-%m-%Y")
+        folder_name += datetime.fromtimestamp(application.close_time).strftime("_%d-%m-%Y")
         
-
+        if not os.path.exists("results/"+folder_name): #in case something goes wrong
+            print("Creating results entry directory...")
+            os.makedirs("results/"+folder_name)
+        
+        print("Writing file...")
+        with open("results/"+folder_name+"/results.csv","w") as file:
+            for i in final_lines:
+                file.writelines(i)
+        
+        print("Success!")
 
 
 
