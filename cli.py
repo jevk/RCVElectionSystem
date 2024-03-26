@@ -75,6 +75,10 @@ def get_results(*args):
     print("Current results:",application.voting_results)
 
 
+def get_past_results(*args):
+    """Get past results"""
+    print(application.past_results)
+
 def archive_election(*args): #long archival process thingy
     """Clear IP addresses from the table and move it to the archive"""
     print("Beginning archival process...")
@@ -156,7 +160,9 @@ commands = {"exit":exit,
             "getips":get_ips,
             "getballots":get_ballots,
             "getresults":get_results,
+            "pastresults":get_past_results,
             "archive":archive_election,} #keyword:function
+
 def main_loop():
     while True:
         a = input("> ")

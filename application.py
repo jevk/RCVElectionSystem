@@ -20,6 +20,7 @@ voted_ips = [] #IPs of people who already voted
 voted_names = [] #usernames of people who already voted
 ballots = {} #current ballot data
 voting_results = {} #currently calculated results
+past_results = {} #past voting results - a dictionary of dictionaries
 logfile = "" #logfile location
 
 verbose = True
@@ -200,6 +201,20 @@ def list_to_percentages(list):
         return ["0%" for i in list]
     else:
         return [str(int(int(i)/total*100))+"%" for i in list]
+
+
+def get_past_results():
+    log("Getting past results...")
+    elections = os.listdir("results")
+    for i in elections:
+        read_results = {}
+        with open("results/"+i+"/results.txt","r") as file:
+            for e in file.readlines():
+                data = e.split(" - ")
+                read_results[data[0]] = int(data[1].strip("\n"))
+        
+        past_results[i] = read_results    
+    log("Success!")
 
 
 def calculate_results(): #returns whether winner is determined
@@ -419,12 +434,28 @@ def results():
 
 @app.route("/past-elections") #past elections page
 def past_elections():
-    return render_template("past-elections.html", pagetitle = "Past Elections")
+    resulting_candidates = {}
+    vote_values = {}
+    percentages = {}
+    
+    for e in past_results:
+        resulting_candidates[e] = []
+        vote_values[e] = []
+        for i in dict(sorted(past_results[e].items(), key = lambda item: item[1], reverse = True)):
+            resulting_candidates[e].append(i)
+            vote_values[e].append(past_results[e][i])
+        percentages[e] = list_to_percentages(vote_values[e])
+    
+    print(vote_values)
+    print(resulting_candidates)
+    print(percentages)
+    
+    return render_template("past-elections.html", pagetitle="Past Elections", candidates=resulting_candidates, results=vote_values, percentages=percentages)
 
 
 @app.route("/tos") #terms of service page
 def tos():
-    return render_template("terms.html", pagetitle = "Terms of Use and Privacy Policy")
+    return render_template("terms.html", pagetitle="Terms of Use and Privacy Policy")
 
 
 
@@ -439,6 +470,7 @@ def init(verb = True):
     pylogging.getLogger('werkzeug').disabled = not verb
     
     start_logger(verb)
+    get_past_results()
     get_candidates()
     get_finns()
     

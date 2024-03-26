@@ -2,8 +2,19 @@
 
 {% block body %}
     <section>
-        <div class="voting-sheet" style="font-size: 2em;">
-            
+        {% for i in candidates %}
+        <div style="text-align:center;">
+            <a id="subtitle">From {{i.split("_")[0]}} to {{i.split("_")[1]}}</a>
         </div>
+        
+        <div class="voting-sheet" style="font-size: 2em; margin-bottom:2em;">
+            {% for e in range((candidates[i])|length) %}
+                {{candidates[i][e]}}
+                <div class="score-container">
+                    <div class="score-bar" style="width: {{percentages[i][e]}}">{{results[i][e]}}</div>
+                </div>
+            {% endfor %}
+        </div>
+        {% endfor %}
     </section>
 {% endblock %}
