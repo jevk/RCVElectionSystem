@@ -105,8 +105,17 @@ def archive_election(*args):
         print("Writing file...")
         with open("results/"+folder_name+"/results.csv","w") as file:
             for i in final_lines:
-                file.writelines(i)
+                file.write(i)
         
+        print("Copying candidates.txt...")
+        lines = []
+        with open("candidates.txt","r") as file:
+            lines = deepcopy(file.readlines())
+        
+        with open("results/"+folder_name+"/candidates.txt","w") as file:
+            for i in lines:
+                file.write(i)
+                
         print("Success!")
 
 
