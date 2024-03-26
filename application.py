@@ -52,8 +52,9 @@ def log(input): #we want to only log outputs from the actual voting site flask o
     curr_time = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S ")
     if verbose: 
         print(curr_time+"[VotingSite] "+input) #print output lookin like a minecraft server
-    with open(logfile, "a") as file:
-        file.write(curr_time+input+"\n")
+    if os.path.exists(logfile):
+        with open(logfile, "a") as file:
+            file.write(curr_time+input+"\n")
 
 
 

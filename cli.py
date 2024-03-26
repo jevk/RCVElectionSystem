@@ -75,8 +75,10 @@ def get_results(*args):
     print("Current results:",application.voting_results)
 
 
-def archive_election(*args):
+def archive_election(*args): #long archival process thingy
     """Clear IP addresses from the table and move it to the archive"""
+    print("Beginning archival process...")
+    
     if not os.path.exists("results.csv"):
        print("Results file doesn't exist")
     else:
@@ -115,8 +117,29 @@ def archive_election(*args):
         with open("results/"+folder_name+"/candidates.txt","w") as file:
             for i in lines:
                 file.write(i)
-                
+        
+        print("Calculating results...")
+        application.verbose = False
+        application.get_candidates()
+        application.get_ballots()
+        application.calculate_results()
+        results = application.voting_results
+        print(results)
+        
+        print("Writing results to file...")
+        with open("results/"+folder_name+"/results.txt","w") as file:
+            for i in results:
+                file.write(i+" - "+str(results[i])+"\n")
+        
+        if os.path.exists("candidates.txt"):
+            print("Removing candidates.txt...")
+            os.remove("candidates.txt")
+        if os.path.exists("results.csv"):
+            print("Removing results.csv...")
+            os.remove("results.csv")
+        
         print("Success!")
+
 
 
 
