@@ -1,32 +1,12 @@
-<!DOCTYPE html>
-<html>
-    <head>
-        <title>Prime Minister Elections</title>
-        <link rel="stylesheet" type="text/css" href="../static/style.css">
-    </head>
-    <body>
-        <div class="top-bar">
-            <a href="/vote">Vote</a>
-            <a href="/results">Results</a>
-            <a href="/past-elections">Past Elections</a>
+{% extends "layout.html" %}
+
+{% block body %}
+    <section>
+        <div class="voting-sheet" style="font-size: 2em;">
+            By submitting a vote, you agree to your IP being stored temporarily in a hashed format to ensure that no duplicate votes are cast. This data will be deleted after the election is over. The results of the election will be published on the website. The website does not store any personal data other than your hashed IP address, time of vote, voting ballot, and your in-game name. By using the website, you agree to the terms of use and privacy policy. The website is not affiliated with the Minecraft server in any way.
+            <br>
+            <br>
+            <button onclick="window.location.href = '/vote';" class="submit-button" style="margin-top: 20px;">Back to Voting</button>
         </div>
-        
-        <section>
-            <!-- Finnish flag and coat of arms decoration -->
-            <div class="container">
-                <div class="flag"></div>
-                <h1 class="title">Terms of Use and Privacy Policy</h1>
-                <div class="coat"></div>
-            </div>
-        </section>
-        
-        <section>
-            <div class="voting-sheet" style="font-size: 2em;">
-                By submitting a vote, you agree to your IP being stored temporarily in a hashed format to ensure that no duplicate votes are cast. This data will be deleted after the election is over. The results of the election will be published on the website. The website does not store any personal data other than your hashed IP address, time of vote, voting ballot, and your in-game name. By using the website, you agree to the terms of use and privacy policy. The website is not affiliated with the Minecraft server in any way.
-                <br>
-                <br>
-                <button onclick="window.location.href = '/vote';" class="submit-button" style="margin-top: 20px;">Back to Voting</button>
-            </div>
-        </section>
-    </body>
-</html>
+    </section>
+{% endblock %}

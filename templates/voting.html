@@ -1,64 +1,39 @@
-<!DOCTYPE html>
-<html>
-    <head>
-        <title>Prime Minister Elections</title>
-        <link rel="stylesheet" type="text/css" href="static/style.css">
-        <script src="static/submitscript.js"></script>
-    </head>
-    <body>
-        <div class="top-bar">
-            <a href="/vote">Vote</a>
-            <a href="/results">Results</a>
-            <a href="/past-elections">Past Elections</a>
-        </div>
-        
-        <section>
-            <!-- Finnish flag and coat of arms decoration -->
-            <div class="container">
-                <div class="flag"></div>
-                <div>
-                    <h1 class="title">Prime Minister Voting Sheet</h1>
-                    {% if w_timestamp == "running" %}
-                    <div style="text-align:center;">
-                        <a id="counter">{{timestamp}} {{w_timestamp}}</a>
-                    </div>
-                    {% endif %}
-                </div>
-                <div class="coat"></div>
-            </div>
-        </section>
+{% extends "layout.html" %}
 
-        <section>
-            {% if w_timestamp == "running" %}
-            <div class="voting-sheet">
-                <table>
-                    <tr>
-                        <th>Candidate</th>
-                        {% for i in ordinals %}
-                        <td>{{i}}</td>
-                        {% endfor %}
-                    </tr>
-                    {% for i in candidates %}
-                    <tr>
-                        <td name="candidate-name">{{i}}</td>
-                        {% for e in range(ordinals|length) %}
-                        <td><input class="radio-btn" type="radio" name="{{ordinals[e]}}" value="{{i}}{{e+1}}" id="{{i}}{{e+1}}"></td>
-                        {% endfor %}
-                    </tr>
+{% block body %}
+    <script src="static/submitscript.js"></script>
+    
+    <section>
+        {% if w_timestamp == "running" %}
+        <div style="text-align:center;">
+            <a id="counter">{{timestamp}} {{w_timestamp}}</a>
+        </div>
+        <div class="voting-sheet">
+            <table>
+                <tr>
+                    <th>Candidate</th>
+                    {% for i in ordinals %}
+                    <td>{{i}}</td>
                     {% endfor %}
-                </table>
-                <input class="voter-name" type="text" id="voter-name" placeholder="Your in-game name">
-                <p>By voting you agree to our <a href="/tos">terms of service</a></p>
-                <input onclick="sendResults()" class="submit-button" type="submit" value="Submit">
+                </tr>
+                {% for i in candidates %}
+                <tr>
+                    <td name="candidate-name">{{i}}</td>
+                    {% for e in range(ordinals|length) %}
+                    <td><input class="radio-btn" type="radio" name="{{ordinals[e]}}" value="{{i}}{{e+1}}" id="{{i}}{{e+1}}"></td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </table>
+            <input class="voter-name" type="text" id="voter-name" placeholder="Your in-game name">
+            <p>By voting you agree to our <a href="/tos">terms of service</a></p>
+            <input onclick="sendResults()" class="submit-button" type="submit" value="Submit">
+        </div>
+        {% else %}
+            <div>
+                <h1 class="title">Voting is not currently open!</h1>
+                <h2 id="counter">{{timestamp}} {{w_timestamp}}</h2>
             </div>
-            {% else %}
-                <div>
-                    <h1 class="title">Voting is not currently open!</h1>
-                    <h2 id="counter">{{timestamp}} {{w_timestamp}}</h2>
-                </div>
-            {% endif %}
-        </section>
-    </body>
-    <!-- Counter updating script -->
-    <script src="static/timescript.js"></script>
-</html>
+        {% endif %}
+    </section>
+{% endblock %}

@@ -339,7 +339,7 @@ def voting():
         timestamp = open_timestamp()*1000 #cause JS works with milliseconds
         w_timestamp = which_timestamp() #which timestamp is given
         
-        return render_template("voting.html",ordinals = ordinals,candidates = user_candidates, timestamp = timestamp, w_timestamp = w_timestamp)
+        return render_template("voting.html",ordinals = ordinals,candidates = user_candidates, timestamp = timestamp, w_timestamp = w_timestamp, pagetitle = "Prime Minister Voting Sheet")
     else:
         data = request.json
         eyep = sha256(request.remote_addr.encode()).hexdigest()
@@ -409,17 +409,21 @@ def results():
     timestamp = open_timestamp()*1000 #cause JS works with milliseconds
     w_timestamp = which_timestamp() #which timestamp is given
     
-    return render_template("results.html", candidates=resulting_candidates, results=vote_values, percentages=percentages, timestamp = timestamp, w_timestamp=w_timestamp)
+    pagetitle = "Prime Minister Election Final Results"
+    if w_timestamp != "close":
+        pagetitle = "Prime Minister Election Preliminary Results"
+    
+    return render_template("results.html", candidates=resulting_candidates, results=vote_values, percentages=percentages, timestamp=timestamp, w_timestamp=w_timestamp, pagetitle=pagetitle)
 
 
 @app.route("/past-elections") #past elections page
 def past_elections():
-    return render_template("past-elections.html")
+    return render_template("past-elections.html", pagetitle = "Past Elections")
 
 
 @app.route("/tos") #terms of service page
 def tos():
-    return render_template("terms.html")
+    return render_template("terms.html", pagetitle = "Terms of Use and Privacy Policy")
 
 
 

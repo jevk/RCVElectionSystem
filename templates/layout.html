@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Prime Minister Elections</title>
+        <link rel="stylesheet" type="text/css" href="../static/style.css">
+    </head>
+    <body>
+        <div class="top-bar">
+            <a href="/vote">Vote</a>
+            <a href="/results">Results</a>
+            <a href="/past-elections">Past Elections</a>
+        </div>
+
+        <section>
+            <!-- Finnish flag and coat of arms decoration -->
+            <div class="container">
+                <div class="flag"></div>
+                <h1 class="title">{{pagetitle}}</h1>
+                <div class="coat"></div>
+            </div>
+        </section>
+        {% block body %}
+        {% endblock %}
+        <script src="static/timescript.js"></script>
+    </body>
+</html>

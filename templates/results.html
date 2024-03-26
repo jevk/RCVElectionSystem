@@ -1,46 +1,21 @@
-<!DOCTYPE html>
-<html>
-    <head>
-        <title>Prime Minister Elections</title>
-        <link rel="stylesheet" type="text/css" href="../static/style.css">
-    </head>
-    <body>
-        <div class="top-bar">
-            <a href="/vote">Vote</a>
-            <a href="/results">Results</a>
-            <a href="/past-elections">Past Elections</a>
-        </div>
-        
-        <section>
-            <!-- Finnish flag and coat of arms decoration -->
-            <div class="container">
-                <div class="flag"></div>
-                <div>
-                    {% if w_timestamp != "close" %}
-                    <h1 class="title">Prime Minister Election Preliminary Results</h1>
-                    {% else %}
-                    <h1 class="title">Prime Minister Election Final Results</h1>
-                    {% endif %}
-                    <div style="text-align:center;">
-                        <a id="counter">{{timestamp}} {{w_timestamp}}</a>
-                    </div>
+{% extends "layout.html" %}
 
+{% block body %}
+    </section>
+    <section>
+        <div style="text-align:center;">
+            <a id="counter">{{timestamp}} {{w_timestamp}}</a>
+        </div>
+    </section>
+    
+    <section>
+        <div class="voting-sheet" style="font-size: 2em;">
+            {% for e in range(candidates|length) %}
+                {{candidates[e]}}
+                <div class="score-container">
+                    <div class="score-bar" style="width: {{percentages[e]}}">{{results[e]}}</div>
                 </div>
-                <div class="coat"></div>
-            </div>
-        </section>
-        
-        <section>
-            <div class="voting-sheet" style="font-size: 2em;">
-                {% for e in range(candidates|length) %}
-                    {{candidates[e]}}
-                    <div class="score-container">
-                        <div class="score-bar" style="width: {{percentages[e]}}">{{results[e]}}</div>
-                    </div>
-                {% endfor %}
-            </div>
-        </section>
-    </body>
-    <!-- Counter updating script -->
-    <script src="static/timescript.js"></script>
-</html>
+            {% endfor %}
+        </div>
+    </section>
+{% endblock %}
