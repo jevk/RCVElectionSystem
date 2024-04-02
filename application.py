@@ -11,8 +11,8 @@ import logging as pylogging
 
 app = Flask(__name__)
 
-open_time = 1710972000 #1710885600 #voting open time (seconds since epoch)
-close_time = 17211144800 #1711020720 #1710972000 #voting close time (seconds since epoch)
+open_time = 0 #voting open time (seconds since epoch)
+close_time = 0 #voting close time (seconds since epoch)
 
 finns = [] #members in the nation of Finland, when the application is started
 candidates = [] #candidates in the election
@@ -156,18 +156,29 @@ def check_voted_ip(ip): #Returns false if an ip hasn't already voted
 
 #utility thingies
 
-def get_candidates():
+def get_settings():
+    global open_time
+    global close_time
     global candidates
-
-    log("Reading listed candidates from candidates.txt...")
-    if not os.path.exists("candidates.txt"):
-        log("candidates.txt file doesn't exist, exiting...")
+    
+    log("Reading election settings from settings.json...")
+    if not os.path.exists("settings.json"):
+        log("settings.json file doesn't exist, exiting...")
         exit()
-    with open("candidates.txt","r",encoding="UTF8") as file: #read participating candidates from candidates.txt and parse
-        candidates = [i.replace("\n","") for i in file.readlines()] #remove line endings
+
+    with open("settings.json","r",encoding="UTF8") as file:
+        data = json.loads("".join(file.readlines())) #load file contents into json
+        
+        open_time = data["open_time"]
+        log("Election opening timestamp is: "+str(open_time))
+        close_time = data["close_time"]
+        log("Election closing timestamp is: "+str(close_time))
+        
+        candidates = data["candidates"]
         if len(candidates) == 0:
-            log("no candidates listed, exiting...")
+            log("No candidates listed, exiting...")
             exit()
+        
         log("Listed candidates are: "+", ".join(candidates))
 
 
@@ -471,7 +482,7 @@ def init(verb = True):
     
     start_logger(verb)
     get_past_results()
-    get_candidates()
+    get_settings()
     get_finns()
     
     #get data and calculate results
