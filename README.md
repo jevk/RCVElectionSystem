@@ -9,9 +9,9 @@ The site is not currently live at [vote.cumzon.ee](http://vote.cumzon.ee), but w
 
 ## Usage
 1. Install the required libraries
-2. Add candidate names to candidates.txt, each on a separate line
-3. Set the opening and closing times in application.py on lines 14 and 15 respectively. The timestamps are in Unix time (seconds since the epoch). [Here's](https://www.unixtimestamp.com/) a useful tool for generating these timestamps
-4. If running/testing locally run application.py, otherwise run waitress_server.py
+2. Add candidate names to settings.json in the correct json format (see example settings.json)
+3. Set the opening and closing times in settings.json in the correct json format (yet again, see example settings.json). The timestamps are in Unix time (seconds since the epoch). [Here's](https://www.unixtimestamp.com/) a useful tool for generating these timestamps
+4. If running/testing locally run application.py, otherwise run waitress_server.py or run cli.py and execute the command "start"
 
 ## Disclaimers
 - Currently only supports HTTP, HTTPS support is planned in the future
