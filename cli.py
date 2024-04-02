@@ -113,18 +113,18 @@ def archive_election(*args): #long archival process thingy
             for i in final_lines:
                 file.write(i)
         
-        print("Copying candidates.txt...")
+        print("Copying settings.json...")
         lines = []
-        with open("candidates.txt","r") as file:
+        with open("settings.json","r") as file:
             lines = deepcopy(file.readlines())
         
-        with open("results/"+folder_name+"/candidates.txt","w") as file:
+        with open("results/"+folder_name+"/settings.json","w") as file:
             for i in lines:
                 file.write(i)
         
         print("Calculating results...")
         application.verbose = False
-        application.get_candidates()
+        application.get_settings()
         application.get_ballots()
         application.calculate_results()
         results = application.voting_results
@@ -134,10 +134,7 @@ def archive_election(*args): #long archival process thingy
         with open("results/"+folder_name+"/results.txt","w") as file:
             for i in results:
                 file.write(i+" - "+str(results[i])+"\n")
-        
-        if os.path.exists("candidates.txt"):
-            print("Removing candidates.txt...")
-            os.remove("candidates.txt")
+
         if os.path.exists("results.csv"):
             print("Removing results.csv...")
             os.remove("results.csv")
