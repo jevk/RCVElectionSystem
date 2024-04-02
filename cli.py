@@ -84,7 +84,7 @@ def archive_election(*args): #long archival process thingy
     print("Beginning archival process...")
     
     if not os.path.exists("results.csv"):
-       print("Results file doesn't exist")
+       print("Results file doesn't exist, can't continue archival process...")
     else:
         print("Results file found, removing IP hashes...")
         final_lines = []
@@ -104,7 +104,7 @@ def archive_election(*args): #long archival process thingy
         folder_name += datetime.fromtimestamp(application.open_time).strftime("%d-%m-%Y")
         folder_name += datetime.fromtimestamp(application.close_time).strftime("_%d-%m-%Y")
         
-        if not os.path.exists("results/"+folder_name): #in case something goes wrong
+        if not os.path.exists("results/"+folder_name): #in case something goes wrong it can write to the same election's folder
             print("Creating results entry directory...")
             os.makedirs("results/"+folder_name)
         

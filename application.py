@@ -457,10 +457,6 @@ def past_elections():
             vote_values[e].append(past_results[e][i])
         percentages[e] = list_to_percentages(vote_values[e])
     
-    print(vote_values)
-    print(resulting_candidates)
-    print(percentages)
-    
     return render_template("past-elections.html", pagetitle="Past Elections", candidates=resulting_candidates, results=vote_values, percentages=percentages)
 
 
