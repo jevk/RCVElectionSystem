@@ -191,9 +191,16 @@ def get_finns():
         #finns = [i.lower() for i in requests.get("https://api.earthmc.net/v2/aurora/nations/Finland").json()["residents"]]
         
         #and here's the API v3 implementation
-        raw_residents = requests.get("https://api.earthmc.net/v3/aurora/nations/?query=e08ba27e-7179-4b5b-b1b3-b15a117f7ae8").json()[0]["residents"]
+        #Finland, Suomi residents
+        raw_data = requests.get("https://api.earthmc.net/v3/aurora/nations/?query=e08ba27e-7179-4b5b-b1b3-b15a117f7ae8,5e2614c1-59c1-47ba-924f-33758ac61c44").json()
+        raw_residents = []
+        for i in raw_data:
+            for resident in i["residents"]:
+                raw_residents.append(resident)
+        
         finns = [i["name"].lower() for i in raw_residents]
-        log("Current members of the nation are: "+", ".join(finns))
+        log("Current members of the nation are: "+", ".join(finns)+" ("+str(len(finns))+")")
+         
     except:
         log("Something went wrong with getting nation members: "+traceback.format_exc()+" exiting...")
         exit()
